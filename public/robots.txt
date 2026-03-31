@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://medvoice-collector.vercel.app/sitemap.xml
