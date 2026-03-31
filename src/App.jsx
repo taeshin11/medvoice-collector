@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { useSpeechRecognition } from './hooks/useSpeechRecognition'
 import { convertToMedicalTerms } from './utils/medicalTerms'
-import { convertLocal } from './utils/localMedicalDict'
+import { convertWithFreeAI } from './utils/freeAI'
 import { exportXlsx, exportCsv, copyToClipboard, COLUMNS } from './utils/exportData'
 import { sendAnalytics } from './utils/analytics'
 import { t, getLang, setLang, getSupportedLangs } from './i18n/translations'
@@ -154,7 +154,7 @@ function MainApp({ lang, visitorCount, onLangChange }) {
         if (conversionMode === 'ai' && apiKey) {
           terms = await convertToMedicalTerms(fullTranscript, apiKey)
         } else {
-          terms = convertLocal(fullTranscript)
+          terms = await convertWithFreeAI(fullTranscript)
         }
         if (terms) {
           setAiResult(terms)
@@ -334,8 +334,8 @@ function MainApp({ lang, visitorCount, onLangChange }) {
           {conversionMode === 'free' && (
             <p className="text-xs text-gray-400">
               {lang === 'ko'
-                ? 'Free 모드는 내장 의학 용어 사전으로 변환합니다. 더 정확한 변환은 AI 모드를 사용하세요.'
-                : 'Free mode uses a built-in medical dictionary. For more accurate conversion, use AI mode.'}
+                ? 'Free 모드는 Pollinations AI를 사용합니다. API 키 없이 무료! (네트워크 오류 시 내장 사전 사용)'
+                : 'Free mode uses Pollinations AI. Free, no API key! (Falls back to local dictionary if offline)'}
             </p>
           )}
         </div>
