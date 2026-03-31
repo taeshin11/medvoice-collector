@@ -1,4 +1,4 @@
-const WEBHOOK_URL = 'https://script.google.com/macros/s/PLACEHOLDER/exec'
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz_y6G7Is61lUoJNKK66wJFKqbmE-6lLpTTjle8eE9uB6TQgROAvhqV0hAxG9cNez4h/exec'
 
 function getDeviceType() {
   const w = window.innerWidth

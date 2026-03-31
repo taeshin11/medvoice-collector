@@ -4,7 +4,7 @@
 
 **제품명:** MedVoice Collector (메드보이스 콜렉터)
 **브랜드:** SPINAI
-**한줄 요약:** 회진·외래 진료 중 의사-환자 대화를 AI가 실시간으로 듣고, 의학 용어로 자동 변환하여 엑셀형 데이터베이스에 채워주는 웹 애플리케이션
+**한11111줄 요약:** 회진·외래 진료 중 의사-환자 대화를 AI가 실시간으로 듣고, 의학 용어로 자동 변환하여 엑셀형 데이터베이스에 채워주는 웹 애플리케이션
 
 ---
 
@@ -123,6 +123,28 @@
 | 도메인 | `medvoice.spinai.dev` 또는 Vercel 기본 도메인 |
 | 모바일 대응 | PWA manifest, 홈화면 추가 지원, viewport meta |
 
+### AI 모델 스택 상세
+
+| 용도 | 모델 | Phase | 비고 |
+|------|------|-------|------|
+| 의학 용어 변환 (기본) | Claude Sonnet 4 (`claude-sonnet-4-20250514`) | MVP | 속도/비용/정확도 밸런스 최적. 사용자 API 키 직접 입력 |
+| 의학 용어 변환 (프리미엄) | Claude Opus 4 | Phase 2 | 복잡한 진단 추론, 진료과 특화 변환. 유료 기능 |
+| STT — Android/PC | Web Speech API (브라우저 내장) | MVP | 무료, 실시간 스트리밍 |
+| STT — iOS Safari 폴백 | OpenAI Whisper API | MVP | iOS에서 Web Speech API 미지원 시 자동 전환 |
+| STT — 고정밀 (프리미엄) | Whisper API (모든 플랫폼) | Phase 2 | 의료 용어 인식률 향상. 유료 기능 |
+
+**MVP 단계 (현재) — 사용자 API 키 직접 입력:**
+- 사용자가 직접 Claude API 키 입력 → 브라우저 localStorage에만 저장
+- 서버 경유 없음 → 우리 인프라 비용 $0
+- 빠른 검증 목적, Phase 2에서 백엔드 구조로 전환 예정
+
+**Phase 2 전환 목표 — 백엔드 프록시 구조 (유료화):**
+- 아키텍처: `사용자 → Vercel Serverless Functions (API 프록시) → Claude API`
+- SPINAI가 API 키를 서버에서 관리 → 사용자는 API 키 불필요
+- 사용량 추적 → 티어별 과금 (Free/Pro/Team)
+- 결제 연동: Stripe 또는 Paddle (추후 결정)
+- 이 구조가 **확정된 유료화 방향**임
+
 ---
 
 ## 7. MVP 범위 (Phase 1 — 2일 목표)
@@ -138,14 +160,36 @@
 - [x] PWA manifest (홈화면 추가 → 앱처럼 사용)
 - [x] 대화 transcript 표시
 
-### ❌ 미포함 (Phase 2+)
-- [ ] 화자 분리 (Speaker Diarization)
-- [ ] EMR 시스템 직접 연동
+### ❌ 미포함 (Phase 2+ / 유료화 로드맵)
+
+**Phase 2 — 유료화 기반 구축:**
+- [ ] 사용자 인증 / 로그인 (Google OAuth)
+- [ ] Vercel Serverless API 프록시 (서버에서 Claude API 키 관리 → 사용량 추적)
+- [ ] 프리/프리미엄 티어 분리 (무료: 하루 5회 변환 / 유료: 무제한)
+- [ ] 서버 사이드 DB (PostgreSQL 또는 Supabase)
+- [ ] 데이터 클라우드 저장 & 다기기 동기화
+
+**Phase 3 — 프리미엄 기능:**
+- [ ] Claude Opus 4 기반 고급 변환 (복잡한 진단 추론, 진료과별 특화)
+- [ ] Whisper API 고정밀 모드 (모든 플랫폼에서 의료 용어 최적화 STT)
+- [ ] 화자 분리 (Speaker Diarization) — 의사/환자 발화 자동 구분
 - [ ] 진료과별 커스텀 용어 사전 관리
-- [ ] 다중 사용자 / 로그인
-- [ ] 서버 사이드 DB (PostgreSQL 등)
+- [ ] 팀 기능 (여러 의사가 같은 환자 데이터 공유)
+- [ ] 변환 히스토리 & AI 학습 피드백 루프
+
+**Phase 4 — 확장:**
+- [ ] EMR 시스템 직접 연동 (FHIR API)
 - [ ] 모바일 네이티브 앱 (PWA로 대부분 커버, 필요 시 고려)
 - [ ] HIPAA/의료정보보호 규정 대응
+- [ ] 다국어 지원 (영어, 일본어)
+
+### 유료화 모델 (Pricing 구상)
+
+| 티어 | 가격 | 포함 기능 |
+|------|------|----------|
+| Free | $0 | 하루 5회 AI 변환, Web Speech API STT, 로컬 저장, xlsx/csv 내보내기 |
+| Pro | ~$9.99/월 | 무제한 AI 변환 (Sonnet 4), Whisper 고정밀 STT, 클라우드 동기화 |
+| Team | ~$19.99/월/인 | Pro 전체 + Opus 4 고급 변환, 팀 공유, 진료과 특화 사전, 우선 지원 |
 
 ---
 
@@ -216,7 +260,7 @@
 | 도메인 | Vercel 기본 도메인 (`*.vercel.app`) | GitHub 링크 노출 금지 — Vercel URL로만 공유 |
 | STT (Android/PC) | Web Speech API | 브라우저 내장, 무료 |
 | STT (iOS 폴백) | Whisper API | 사용량 최소화, 캐싱 적용 |
-| AI 변환 | Claude API (Sonnet) | 프롬프트 최적화로 토큰 절약 |
+| AI 변환 | Claude API (Sonnet 4) | 프롬프트 최적화로 토큰 절약 |
 | 데이터 수집 | Google Sheets + Apps Script | 무료 |
 | 분석 | 방문자 카운터 (자체 구현) | Footer 배치 |
 
@@ -405,7 +449,7 @@ function doPost(e) {
 |--------|------|
 | Web Speech API 한국어 의료 용어 인식률 낮음 | Whisper API 폴백, 후처리 보정 |
 | iOS Safari Web Speech API 미지원 | Whisper API 자동 전환 (디바이스 감지) |
-| Claude API 비용 | MVP 단계에선 소량 사용, 캐싱 활용 |
+| Claude API 비용 | MVP: 사용자 자기 키 사용 → Phase 2: 백엔드 프록시 + 티어별 과금으로 수익화 |
 | 환자 개인정보 보호 | 음성 파일 미저장, 로컬 저장만, 서버 전송 없음. 추후 규정 대응 |
 | 진료과마다 용어 체계 다름 | Phase 2에서 커스텀 사전 기능 추가 |
 | 병원 네트워크 환경 (인터넷 제한) | PWA 오프라인 캐시 기본 적용, 오프라인 모드 고도화는 Phase 2 |
