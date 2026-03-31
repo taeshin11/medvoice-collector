@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medvoice-v7'
+const CACHE_NAME = 'medvoice-v8'
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',

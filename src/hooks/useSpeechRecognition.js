@@ -25,6 +25,7 @@ export function useSpeechRecognition(onError, lang = 'ko') {
   const isListeningRef = useRef(false)
   const isPausedRef = useRef(false)
   const chunkIntervalRef = useRef(null)
+  const lastFinalRef = useRef('')
   onErrorRef.current = onError
 
   useEffect(() => {
@@ -82,7 +83,12 @@ export function useSpeechRecognition(onError, lang = 'ko') {
         }
       }
       if (final) {
-        setTranscript(prev => prev + final)
+        const trimmed = final.trim()
+        // Deduplicate: skip if identical to last finalized text
+        if (trimmed && trimmed !== lastFinalRef.current) {
+          lastFinalRef.current = trimmed
+          setTranscript(prev => prev + final)
+        }
       }
       setInterimText(interim)
     }
@@ -100,7 +106,12 @@ export function useSpeechRecognition(onError, lang = 'ko') {
 
     recognition.onend = () => {
       if (recognitionRef.current && isListeningRef.current && !isPausedRef.current) {
-        try { recognition.start() } catch {}
+        // Small delay to prevent duplicate recognition on restart
+        setTimeout(() => {
+          if (isListeningRef.current && !isPausedRef.current) {
+            try { recognition.start() } catch {}
+          }
+        }, 300)
       }
     }
 
@@ -239,6 +250,7 @@ export function useSpeechRecognition(onError, lang = 'ko') {
     setTranscript('')
     setInterimText('')
     setDuration(0)
+    lastFinalRef.current = ''
   }, [])
 
   return {
