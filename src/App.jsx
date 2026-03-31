@@ -59,6 +59,9 @@ function MainApp({ lang, visitorCount }) {
   const [showFeedback, setShowFeedback] = useState(false)
   const [feedbackText, setFeedbackText] = useState('')
   const [showExport, setShowExport] = useState(false)
+  const [lastTranscript, setLastTranscript] = useState('')
+  const [aiResult, setAiResult] = useState(null)
+  const [showAiResult, setShowAiResult] = useState(false)
   const transcriptEndRef = useRef(null)
   const activeIdxRef = useRef(activeIdx)
   activeIdxRef.current = activeIdx
@@ -123,6 +126,7 @@ function MainApp({ lang, visitorCount }) {
     speech.stop()
 
     const fullTranscript = speech.transcript
+    setLastTranscript(fullTranscript)
     updateField('transcript', (patients[capturedIdx]?.transcript || '') + fullTranscript)
 
     sendAnalytics({
@@ -134,9 +138,12 @@ function MainApp({ lang, visitorCount }) {
 
     if (fullTranscript.trim() && apiKey) {
       setIsConverting(true)
+      setAiResult(null)
       try {
         const terms = await convertToMedicalTerms(fullTranscript, apiKey)
         if (terms) {
+          setAiResult(terms)
+          setShowAiResult(true)
           setPatients(prev => prev.map((p, i) => {
             if (i !== capturedIdx) return p
             return {
@@ -259,11 +266,61 @@ function MainApp({ lang, visitorCount }) {
         </div>
       )}
 
+      {/* Recording banner — always visible when recording */}
+      {speech.isListening && (
+        <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 py-3 flex items-center justify-between recording-banner">
+          <div className="flex items-center gap-3">
+            <span className="w-3 h-3 bg-white rounded-full recording-pulse inline-block"></span>
+            <span className="font-semibold text-sm">
+              {speech.isPaused
+                ? (lang === 'ko' ? '일시정지됨' : 'Paused')
+                : (lang === 'ko' ? '녹음 중...' : 'Recording...')}
+            </span>
+            <span className="font-mono text-sm opacity-90">{formatDuration(speech.duration)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Sound wave animation */}
+            {!speech.isPaused && (
+              <div className="flex items-end gap-0.5 h-5">
+                <span className="w-1 bg-white/80 rounded-full sound-bar" style={{animationDelay: '0s'}}></span>
+                <span className="w-1 bg-white/80 rounded-full sound-bar" style={{animationDelay: '0.15s'}}></span>
+                <span className="w-1 bg-white/80 rounded-full sound-bar" style={{animationDelay: '0.3s'}}></span>
+                <span className="w-1 bg-white/80 rounded-full sound-bar" style={{animationDelay: '0.45s'}}></span>
+                <span className="w-1 bg-white/80 rounded-full sound-bar" style={{animationDelay: '0.6s'}}></span>
+              </div>
+            )}
+            {!speech.isPaused ? (
+              <button onClick={() => speech.pause()} className="px-3 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-xs font-medium transition-all">
+                {t('pause', lang)}
+              </button>
+            ) : (
+              <button onClick={() => speech.resume()} className="px-3 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-xs font-medium transition-all">
+                {t('resume', lang)}
+              </button>
+            )}
+            <button onClick={handleStop} className="px-3 py-1 rounded-lg bg-white text-red-600 text-xs font-semibold hover:bg-red-50 transition-all">
+              {lang === 'ko' ? '중지 & AI 변환' : 'Stop & Convert'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* AI Converting overlay */}
+      {isConverting && (
+        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-3 flex items-center justify-center gap-3">
+          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          <span className="font-semibold text-sm">{t('converting', lang)}</span>
+        </div>
+      )}
+
       {/* Main content */}
       <main className="flex-1 flex flex-col lg:flex-row gap-3 p-3">
         {/* Left: Transcript + Controls */}
         <section className="lg:w-[38%] flex flex-col card overflow-hidden">
-          <div className="flex-1 p-4 overflow-y-auto max-h-[35vh] lg:max-h-[calc(100vh-240px)]">
+          <div className="flex-1 p-4 overflow-y-auto max-h-[40vh] lg:max-h-[calc(100vh-240px)]">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,20 +331,49 @@ function MainApp({ lang, visitorCount }) {
               {speech.isListening && (
                 <span className="inline-flex items-center gap-1.5 text-red-500 text-xs font-mono bg-red-50 px-2 py-1 rounded-full">
                   <span className="w-2 h-2 bg-red-500 rounded-full recording-pulse inline-block"></span>
-                  {formatDuration(speech.duration)}
+                  REC
                 </span>
               )}
             </div>
-            <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+            <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap min-h-[100px]">
+              {/* Previous transcripts */}
               {activePatient.transcript && (
-                <div className="text-gray-300 mb-2 pb-2 border-b border-gray-100">{activePatient.transcript}</div>
+                <div className="text-gray-400 mb-3 pb-3 border-b border-gray-100 text-xs">
+                  <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider block mb-1">
+                    {lang === 'ko' ? '이전 기록' : 'Previous'}
+                  </span>
+                  {activePatient.transcript}
+                </div>
               )}
-              {speech.transcript && <span className="text-gray-700">{speech.transcript}</span>}
+              {/* Live transcript */}
+              {speech.transcript && (
+                <div className="mb-1">
+                  <span className="text-gray-700">{speech.transcript}</span>
+                </div>
+              )}
               {speech.interimText && (
                 <span className="text-indigo-400 italic">{speech.interimText}</span>
               )}
-              {!activePatient.transcript && !speech.transcript && !speech.interimText && (
-                <p className="text-gray-300 italic text-center py-8">{t('transcriptPlaceholder', lang)}</p>
+              {/* Last session transcript (after stop, before new recording) */}
+              {!speech.isListening && !speech.transcript && lastTranscript && (
+                <div className="bg-gray-50 rounded-lg p-3 mb-2">
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
+                    {lang === 'ko' ? '마지막 녹음 내용' : 'Last Recording'}
+                  </span>
+                  <span className="text-gray-600 text-xs">{lastTranscript}</span>
+                </div>
+              )}
+              {/* Placeholder */}
+              {!activePatient.transcript && !speech.transcript && !speech.interimText && !lastTranscript && (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-indigo-50 flex items-center justify-center">
+                    <svg className="w-8 h-8 text-indigo-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                  </div>
+                  <p className="text-gray-300 italic text-sm">{t('transcriptPlaceholder', lang)}</p>
+                </div>
               )}
               <div ref={transcriptEndRef} />
             </div>
@@ -297,7 +383,7 @@ function MainApp({ lang, visitorCount }) {
           <div className="p-5 border-t border-gray-100/50 flex items-center justify-center gap-4 bg-gradient-to-t from-white/40 to-transparent">
             {!speech.isListening ? (
               <button
-                onClick={() => speech.start()}
+                onClick={() => { setLastTranscript(''); speech.start() }}
                 aria-label={t('startRecording', lang)}
                 className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center hover:from-indigo-600 hover:to-purple-700 transition-all shadow-xl mic-glow active:scale-95"
               >
@@ -307,53 +393,33 @@ function MainApp({ lang, visitorCount }) {
                 </svg>
               </button>
             ) : (
-              <>
-                {!speech.isPaused ? (
-                  <button
-                    onClick={() => speech.pause()}
-                    aria-label={t('pause', lang)}
-                    className="w-14 h-14 rounded-full bg-amber-400 text-white flex items-center justify-center hover:bg-amber-500 transition-all shadow-lg active:scale-95"
-                  >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                    </svg>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => speech.resume()}
-                    aria-label={t('resume', lang)}
-                    className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-all shadow-lg active:scale-95"
-                  >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </button>
-                )}
-                <button
-                  onClick={handleStop}
-                  aria-label={t('stopAndConvert', lang)}
-                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center hover:from-red-600 hover:to-rose-700 transition-all shadow-xl recording-pulse active:scale-95"
-                >
-                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                    <rect x="7" y="7" width="10" height="10" rx="2"/>
-                  </svg>
-                </button>
-              </>
+              <button
+                onClick={handleStop}
+                aria-label={t('stopAndConvert', lang)}
+                className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center hover:from-red-600 hover:to-rose-700 transition-all shadow-xl recording-pulse active:scale-95"
+              >
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="7" y="7" width="10" height="10" rx="2"/>
+                </svg>
+              </button>
             )}
           </div>
-          {isConverting && (
-            <div className="text-center py-2.5 text-xs text-indigo-600 bg-indigo-50/60 border-t border-indigo-100/40 flex items-center justify-center gap-2">
-              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-              </svg>
-              {t('converting', lang)}
-            </div>
-          )}
           {speech.useWhisper && (
             <div className="text-center py-1.5 text-xs text-amber-600 bg-amber-50/60 border-t border-amber-100/30">
               {t('iosMode', lang)}
             </div>
+          )}
+          {/* AI Result button */}
+          {aiResult && !speech.isListening && (
+            <button
+              onClick={() => setShowAiResult(true)}
+              className="text-center py-2 text-xs text-indigo-600 bg-indigo-50/60 border-t border-indigo-100/30 hover:bg-indigo-50 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              {lang === 'ko' ? 'AI 변환 결과 보기' : 'View AI Results'}
+            </button>
           )}
         </section>
 
@@ -494,6 +560,77 @@ function MainApp({ lang, visitorCount }) {
 
       {showExport && (
         <div className="fixed inset-0 z-30" onClick={() => setShowExport(false)} />
+      )}
+
+      {/* AI Result Modal */}
+      {showAiResult && aiResult && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+          onClick={() => setShowAiResult(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-white rounded-2xl p-5 w-full max-w-lg shadow-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </span>
+                {lang === 'ko' ? 'AI 변환 결과' : 'AI Conversion Results'}
+              </h3>
+              <button onClick={() => setShowAiResult(false)} className="text-gray-400 hover:text-gray-600 p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Original transcript */}
+            {lastTranscript && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-xl">
+                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
+                  {lang === 'ko' ? '원본 대화' : 'Original Transcript'}
+                </span>
+                <p className="text-sm text-gray-600">{lastTranscript}</p>
+              </div>
+            )}
+
+            {/* Converted terms */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-semibold text-indigo-500 uppercase tracking-wider">
+                {lang === 'ko' ? '의학 용어 변환' : 'Medical Term Mapping'}
+              </span>
+              {[
+                { key: 'cc', label: 'C.C (Chief Complaint)' },
+                { key: 'presentIllness', label: 'Present Illness' },
+                { key: 'associatedSx', label: 'Associated Sx' },
+                { key: 'pastHx', label: 'Past Hx' },
+                { key: 'diagnosis', label: 'Diagnosis' },
+                { key: 'plan', label: 'Plan' },
+                { key: 'notes', label: 'Notes' },
+              ].map(field => aiResult[field.key] ? (
+                <div key={field.key} className="flex gap-3 p-2.5 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
+                  <span className="text-xs font-semibold text-indigo-600 min-w-[100px] shrink-0">{field.label}</span>
+                  <span className="text-sm text-gray-700">{aiResult[field.key]}</span>
+                </div>
+              ) : null)}
+              {Object.values(aiResult).every(v => !v) && (
+                <p className="text-sm text-gray-400 italic text-center py-4">
+                  {lang === 'ko' ? '변환된 내용이 없습니다.' : 'No terms were converted.'}
+                </p>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowAiResult(false)}
+              className="w-full mt-4 py-2.5 rounded-xl btn-primary text-sm"
+            >
+              {lang === 'ko' ? '확인' : 'OK'}
+            </button>
+          </div>
+        </div>
       )}
     </>
   )
