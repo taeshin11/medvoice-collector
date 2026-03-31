@@ -64,7 +64,9 @@ function MainApp({ lang, visitorCount }) {
   const [aiResult, setAiResult] = useState(null)
   const [showAiResult, setShowAiResult] = useState(false)
   const [conversionMode, setConversionMode] = useState(() => localStorage.getItem('medvoice_mode') || 'free')
+  const [justUpdated, setJustUpdated] = useState(false)
   const transcriptEndRef = useRef(null)
+  const tableRef = useRef(null)
   const activeIdxRef = useRef(activeIdx)
   activeIdxRef.current = activeIdx
 
@@ -164,7 +166,12 @@ function MainApp({ lang, visitorCount }) {
               notes: [p.notes, terms.notes].filter(Boolean).join(' '),
             }
           }))
-          showToast(conversionMode === 'ai' ? t('conversionComplete', lang) : (lang === 'ko' ? '정리 완료 (Free 모드)' : 'Organized (Free mode)'))
+          showToast(conversionMode === 'ai' ? t('conversionComplete', lang) : (lang === 'ko' ? '정리 완료! 아래 표를 확인하세요' : 'Done! Check the table below'))
+          // Highlight + scroll to table
+          setJustUpdated(true)
+          setTimeout(() => {
+            setJustUpdated(false)
+          }, 3000)
         }
       } catch (err) {
         showToast(t('conversionFailed', lang) + err.message)
@@ -476,7 +483,7 @@ function MainApp({ lang, visitorCount }) {
         </section>
 
         {/* Right: Data Table */}
-        <section className="lg:w-[62%] flex flex-col card overflow-hidden">
+        <section ref={tableRef} className={`lg:w-[62%] flex flex-col card overflow-hidden transition-all duration-500 ${justUpdated ? 'ring-2 ring-indigo-400 ring-offset-2' : ''}`}>
           <div className="p-4 overflow-auto flex-1">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -498,7 +505,7 @@ function MainApp({ lang, visitorCount }) {
                   {patients.map((patient, pIdx) => (
                     <tr
                       key={patient.id}
-                      className={`${pIdx === activeIdx ? 'bg-indigo-50/40' : ''} cursor-pointer transition-colors`}
+                      className={`${pIdx === activeIdx ? (justUpdated ? 'bg-indigo-100/70 table-row-flash' : 'bg-indigo-50/40') : ''} cursor-pointer transition-colors`}
                       onClick={() => {
                         setActiveIdx(pIdx)
                         if (!speech.isListening) speech.resetTranscript()
@@ -677,12 +684,26 @@ function MainApp({ lang, visitorCount }) {
               )}
             </div>
 
-            <button
-              onClick={() => setShowAiResult(false)}
-              className="w-full mt-4 py-2.5 rounded-xl btn-primary text-sm"
-            >
-              {lang === 'ko' ? '확인' : 'OK'}
-            </button>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setShowAiResult(false)}
+                className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium hover:bg-gray-200 transition-colors"
+              >
+                {lang === 'ko' ? '닫기' : 'Close'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowAiResult(false)
+                  setTimeout(() => tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+                }}
+                className="flex-1 py-2.5 rounded-xl btn-primary text-sm flex items-center justify-center gap-1.5"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+                {lang === 'ko' ? '표 확인하기' : 'View Table'}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -54,6 +54,15 @@ body {
   animation: pulse-rec 1.5s infinite;
 }
 
+/* Table row flash when data is added */
+@keyframes row-flash {
+  0%, 100% { background-color: rgba(199, 210, 254, 0.3); }
+  50% { background-color: rgba(165, 180, 252, 0.5); }
+}
+.table-row-flash td {
+  animation: row-flash 1s ease-in-out 3;
+}
+
 /* Sound bar animation */
 @keyframes sound-wave {
   0%, 100% { height: 4px; }
