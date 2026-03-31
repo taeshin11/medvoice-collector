@@ -9,7 +9,7 @@ function hasWebSpeechAPI() {
   return !!(window.SpeechRecognition || window.webkitSpeechRecognition)
 }
 
-export function useSpeechRecognition() {
+export function useSpeechRecognition(onError) {
   const [isListening, setIsListening] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [transcript, setTranscript] = useState('')
@@ -21,6 +21,8 @@ export function useSpeechRecognition() {
   const chunksRef = useRef([])
   const timerRef = useRef(null)
   const startTimeRef = useRef(null)
+  const onErrorRef = useRef(onError)
+  onErrorRef.current = onError
 
   useEffect(() => {
     if (isIOSSafari() && !hasWebSpeechAPI()) {
@@ -75,6 +77,11 @@ export function useSpeechRecognition() {
       if (event.error === 'not-allowed') {
         setIsListening(false)
         stopTimer()
+        onErrorRef.current?.('마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크를 허용해주세요.')
+      } else if (event.error === 'no-speech') {
+        // ignore, will restart
+      } else {
+        onErrorRef.current?.('음성 인식 오류: ' + event.error)
       }
     }
 

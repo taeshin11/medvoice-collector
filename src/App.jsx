@@ -26,11 +26,17 @@ function formatDuration(s) {
   return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
 }
 
+function safeParse(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key)
+    return saved ? JSON.parse(saved) : fallback
+  } catch {
+    return fallback
+  }
+}
+
 export default function App() {
-  const [patients, setPatients] = useState(() => {
-    const saved = localStorage.getItem('medvoice_patients')
-    return saved ? JSON.parse(saved) : [DEFAULT_PATIENT()]
-  })
+  const [patients, setPatients] = useState(() => safeParse('medvoice_patients', [DEFAULT_PATIENT()]))
   const [activeIdx, setActiveIdx] = useState(0)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('claude_api_key') || '')
   const [whisperKey, setWhisperKey] = useState(() => localStorage.getItem('openai_api_key') || '')
@@ -40,15 +46,22 @@ export default function App() {
   const [showFeedback, setShowFeedback] = useState(false)
   const [feedbackText, setFeedbackText] = useState('')
   const [showExport, setShowExport] = useState(false)
-  const [visitorCount, setVisitorCount] = useState(() => {
+  const [visitorCount] = useState(() => {
     const c = parseInt(localStorage.getItem('medvoice_visitors') || '0')
     const newC = c + 1
     localStorage.setItem('medvoice_visitors', String(newC))
     return newC
   })
   const transcriptEndRef = useRef(null)
+  const activeIdxRef = useRef(activeIdx)
+  activeIdxRef.current = activeIdx
 
-  const speech = useSpeechRecognition()
+  const showToast = useCallback((msg) => {
+    setToast(msg)
+    setTimeout(() => setToast(''), 3000)
+  }, [])
+
+  const speech = useSpeechRecognition(showToast)
 
   // Save patients to localStorage
   useEffect(() => {
@@ -68,16 +81,23 @@ export default function App() {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [speech.transcript, speech.interimText])
 
-  // Show toast
-  const showToast = useCallback((msg) => {
-    setToast(msg)
-    setTimeout(() => setToast(''), 2000)
+  // Escape key to close modals
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'Escape') {
+        setShowFeedback(false)
+        setShowExport(false)
+        setShowSettings(false)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
   }, [])
 
   // Update active patient field
   const updateField = useCallback((field, value) => {
-    setPatients(prev => prev.map((p, i) => i === activeIdx ? { ...p, [field]: value } : p))
-  }, [activeIdx])
+    setPatients(prev => prev.map((p, i) => i === activeIdxRef.current ? { ...p, [field]: value } : p))
+  }, [])
 
   // Add new patient
   const addPatient = useCallback(() => {
@@ -88,39 +108,47 @@ export default function App() {
     speech.resetTranscript()
   }, [patients.length, speech])
 
+  // Delete patient
+  const deletePatient = useCallback((idx) => {
+    if (patients.length <= 1) {
+      showToast('최소 1명의 환자가 필요합니다')
+      return
+    }
+    setPatients(prev => prev.filter((_, i) => i !== idx))
+    setActiveIdx(prev => prev >= idx ? Math.max(0, prev - 1) : prev)
+  }, [patients.length, showToast])
+
   // Handle stop — convert + analytics
   const handleStop = useCallback(async () => {
+    const capturedIdx = activeIdxRef.current
     speech.stop()
 
-    // Save transcript to patient
     const fullTranscript = speech.transcript
-    updateField('transcript', (patients[activeIdx]?.transcript || '') + fullTranscript)
+    updateField('transcript', (patients[capturedIdx]?.transcript || '') + fullTranscript)
 
-    // Send analytics silently
     sendAnalytics({
-      sessionId: patients[activeIdx]?.id,
+      sessionId: patients[capturedIdx]?.id,
       patientCount: patients.length,
       duration: speech.duration,
       termsConverted: 0,
     })
 
-    // Convert via Claude API
     if (fullTranscript.trim() && apiKey) {
       setIsConverting(true)
       try {
         const terms = await convertToMedicalTerms(fullTranscript, apiKey)
         if (terms) {
           setPatients(prev => prev.map((p, i) => {
-            if (i !== activeIdx) return p
+            if (i !== capturedIdx) return p
             return {
               ...p,
-              cc: p.cc ? p.cc + ', ' + terms.cc : terms.cc,
-              presentIllness: p.presentIllness ? p.presentIllness + ' ' + terms.presentIllness : terms.presentIllness,
-              associatedSx: p.associatedSx ? p.associatedSx + ', ' + terms.associatedSx : terms.associatedSx,
-              pastHx: p.pastHx ? p.pastHx + ' ' + terms.pastHx : terms.pastHx,
-              diagnosis: p.diagnosis ? p.diagnosis + ', ' + terms.diagnosis : terms.diagnosis,
-              plan: p.plan ? p.plan + ' ' + terms.plan : terms.plan,
-              notes: p.notes ? p.notes + ' ' + terms.notes : terms.notes,
+              cc: [p.cc, terms.cc].filter(Boolean).join(', '),
+              presentIllness: [p.presentIllness, terms.presentIllness].filter(Boolean).join(' '),
+              associatedSx: [p.associatedSx, terms.associatedSx].filter(Boolean).join(', '),
+              pastHx: [p.pastHx, terms.pastHx].filter(Boolean).join(' '),
+              diagnosis: [p.diagnosis, terms.diagnosis].filter(Boolean).join(', '),
+              plan: [p.plan, terms.plan].filter(Boolean).join(' '),
+              notes: [p.notes, terms.notes].filter(Boolean).join(' '),
             }
           }))
           showToast('AI 변환 완료!')
@@ -134,7 +162,7 @@ export default function App() {
     }
 
     speech.resetTranscript()
-  }, [speech, apiKey, activeIdx, patients, updateField, showToast])
+  }, [speech, apiKey, patients, updateField, showToast])
 
   // Export handlers
   const handleExportXlsx = () => {
@@ -179,8 +207,8 @@ export default function App() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowSettings(!showSettings)}
+            aria-label="설정"
             className="p-2 rounded-lg hover:bg-blue-50 text-gray-500 transition-colors"
-            title="설정"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -241,16 +269,15 @@ export default function App() {
       )}
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col lg:flex-row gap-0 lg:gap-0">
+      <main className="flex-1 flex flex-col lg:flex-row">
         {/* Left: Transcript + Controls */}
         <section className="lg:w-[40%] flex flex-col border-b lg:border-b-0 lg:border-r border-blue-100 bg-white/40">
-          {/* Transcript area */}
           <div className="flex-1 p-4 overflow-y-auto max-h-[40vh] lg:max-h-[calc(100vh-220px)]">
             <h2 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
               <span>&#127897;</span> 실시간 대화
               {speech.isListening && (
-                <span className="inline-flex items-center gap-1 text-red-500 text-xs">
-                  <span className="w-2 h-2 bg-red-500 rounded-full recording-pulse inline-block"></span>
+                <span className="inline-flex items-center gap-1 text-red-500 text-xs font-mono">
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full recording-pulse inline-block"></span>
                   REC {formatDuration(speech.duration)}
                 </span>
               )}
@@ -259,9 +286,7 @@ export default function App() {
               {activePatient.transcript && (
                 <div className="text-gray-400 mb-2">{activePatient.transcript}</div>
               )}
-              {speech.transcript && (
-                <span>{speech.transcript}</span>
-              )}
+              {speech.transcript && <span>{speech.transcript}</span>}
               {speech.interimText && (
                 <span className="text-blue-400 italic">{speech.interimText}</span>
               )}
@@ -273,12 +298,12 @@ export default function App() {
           </div>
 
           {/* Controls */}
-          <div className="p-4 border-t border-blue-100 bg-white/60 flex items-center justify-center gap-3">
+          <div className="p-4 border-t border-blue-100 bg-white/60 flex items-center justify-center gap-4">
             {!speech.isListening ? (
               <button
                 onClick={() => speech.start()}
+                aria-label="음성 인식 시작"
                 className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-all shadow-lg active:scale-95"
-                title="음성 인식 시작"
               >
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -290,28 +315,28 @@ export default function App() {
                 {!speech.isPaused ? (
                   <button
                     onClick={() => speech.pause()}
-                    className="w-12 h-12 rounded-full bg-yellow-500 text-white flex items-center justify-center hover:bg-yellow-600 transition-all"
-                    title="일시정지"
+                    aria-label="일시정지"
+                    className="w-14 h-14 rounded-full bg-yellow-500 text-white flex items-center justify-center hover:bg-yellow-600 transition-all shadow-md active:scale-95"
                   >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                     </svg>
                   </button>
                 ) : (
                   <button
                     onClick={() => speech.resume()}
-                    className="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-all"
-                    title="재개"
+                    aria-label="재개"
+                    className="w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-all shadow-md active:scale-95"
                   >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
                   </button>
                 )}
                 <button
                   onClick={handleStop}
+                  aria-label="중지 및 AI 변환"
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-lg recording-pulse active:scale-95"
-                  title="중지 및 AI 변환"
                 >
                   <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 6h12v12H6z"/>
@@ -321,7 +346,11 @@ export default function App() {
             )}
           </div>
           {isConverting && (
-            <div className="text-center py-2 text-xs text-blue-600 bg-blue-50 border-t border-blue-100">
+            <div className="text-center py-2 text-xs text-blue-600 bg-blue-50 border-t border-blue-100 flex items-center justify-center gap-2">
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
               AI가 의학 용어로 변환 중...
             </div>
           )}
@@ -342,6 +371,7 @@ export default function App() {
               <table className="data-table w-full border-collapse min-w-[600px]">
                 <thead>
                   <tr>
+                    <th className="w-8"></th>
                     {COLUMNS.map(col => (
                       <th key={col.key}>{col.label}</th>
                     ))}
@@ -357,6 +387,15 @@ export default function App() {
                         if (!speech.isListening) speech.resetTranscript()
                       }}
                     >
+                      <td className="text-center !p-0">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); deletePatient(pIdx) }}
+                          aria-label={`환자 ${pIdx + 1} 삭제`}
+                          className="text-gray-300 hover:text-red-500 transition-colors text-xs px-1 py-1"
+                        >
+                          &#10005;
+                        </button>
+                      </td>
                       {COLUMNS.map(col => (
                         <td key={col.key}>
                           <input
@@ -365,6 +404,7 @@ export default function App() {
                               const val = e.target.value
                               setPatients(prev => prev.map((p, i) => i === pIdx ? { ...p, [col.key]: val } : p))
                             }}
+                            aria-label={`${col.label} for patient ${pIdx + 1}`}
                             placeholder={col.label}
                           />
                         </td>
@@ -379,7 +419,7 @@ export default function App() {
       </main>
 
       {/* Patient tabs */}
-      <nav className="bg-white/80 border-t border-blue-100 px-4 py-2 flex items-center gap-2 overflow-x-auto">
+      <nav className="bg-white/80 border-t border-blue-100 px-4 py-2 flex items-center gap-2 overflow-x-auto" aria-label="환자 목록">
         <span className="text-xs text-gray-400 shrink-0">환자 목록:</span>
         {patients.map((p, idx) => (
           <button
@@ -388,7 +428,7 @@ export default function App() {
               setActiveIdx(idx)
               if (!speech.isListening) speech.resetTranscript()
             }}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors shrink-0 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
               idx === activeIdx
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -399,6 +439,7 @@ export default function App() {
         ))}
         <button
           onClick={addPatient}
+          aria-label="새 환자 추가"
           className="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 text-lg shrink-0"
         >
           +
@@ -414,16 +455,22 @@ export default function App() {
       {!speech.isListening && (
         <button
           onClick={() => setShowFeedback(true)}
-          className="fixed bottom-20 right-4 w-10 h-10 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 transition-all z-50"
-          title="피드백"
+          aria-label="피드백 보내기"
+          className="fixed bottom-20 right-4 w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 transition-all z-50"
         >
-          <span className="text-lg">&#128172;</span>
+          <span className="text-xl">&#128172;</span>
         </button>
       )}
 
       {/* Feedback modal */}
       {showFeedback && (
-        <div className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50 p-4" onClick={() => setShowFeedback(false)}>
+        <div
+          className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50 p-4"
+          onClick={() => setShowFeedback(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="피드백"
+        >
           <div className="bg-white rounded-xl p-4 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
             <h3 className="font-semibold text-gray-700 mb-2">피드백 보내기</h3>
             <textarea
@@ -443,7 +490,7 @@ export default function App() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-50 toast-animate">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-50 toast-animate" role="status">
           {toast}
         </div>
       )}
