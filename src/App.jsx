@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { useSpeechRecognition } from './hooks/useSpeechRecognition'
 import { convertToMedicalTerms } from './utils/medicalTerms'
+import { convertLocal } from './utils/localMedicalDict'
 import { exportXlsx, exportCsv, copyToClipboard, COLUMNS } from './utils/exportData'
 import { sendAnalytics } from './utils/analytics'
 import { t, getLang, setLang, getSupportedLangs } from './i18n/translations'
@@ -62,6 +63,7 @@ function MainApp({ lang, visitorCount }) {
   const [lastTranscript, setLastTranscript] = useState('')
   const [aiResult, setAiResult] = useState(null)
   const [showAiResult, setShowAiResult] = useState(false)
+  const [conversionMode, setConversionMode] = useState(() => localStorage.getItem('medvoice_mode') || 'free')
   const transcriptEndRef = useRef(null)
   const activeIdxRef = useRef(activeIdx)
   activeIdxRef.current = activeIdx
@@ -136,11 +138,16 @@ function MainApp({ lang, visitorCount }) {
       termsConverted: 0,
     })
 
-    if (fullTranscript.trim() && apiKey) {
+    if (fullTranscript.trim()) {
       setIsConverting(true)
       setAiResult(null)
       try {
-        const terms = await convertToMedicalTerms(fullTranscript, apiKey)
+        let terms = null
+        if (conversionMode === 'ai' && apiKey) {
+          terms = await convertToMedicalTerms(fullTranscript, apiKey)
+        } else {
+          terms = convertLocal(fullTranscript)
+        }
         if (terms) {
           setAiResult(terms)
           setShowAiResult(true)
@@ -157,14 +164,14 @@ function MainApp({ lang, visitorCount }) {
               notes: [p.notes, terms.notes].filter(Boolean).join(' '),
             }
           }))
-          showToast(t('conversionComplete', lang))
+          showToast(conversionMode === 'ai' ? t('conversionComplete', lang) : (lang === 'ko' ? '용어 변환 완료 (Free 모드)' : 'Terms converted (Free mode)'))
+        } else {
+          showToast(lang === 'ko' ? '인식된 의학 용어가 없습니다' : 'No medical terms detected')
         }
       } catch (err) {
         showToast(t('conversionFailed', lang) + err.message)
       }
       setIsConverting(false)
-    } else if (!apiKey && fullTranscript.trim()) {
-      showToast(t('setApiKey', lang))
     }
 
     speech.resetTranscript()
@@ -207,6 +214,9 @@ function MainApp({ lang, visitorCount }) {
             M
           </div>
           <span className="text-base font-semibold text-gray-800 tracking-tight">MedVoice</span>
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${conversionMode === 'free' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`}>
+            {conversionMode === 'free' ? 'FREE' : 'AI'}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -239,30 +249,74 @@ function MainApp({ lang, visitorCount }) {
 
       {/* Settings panel */}
       {showSettings && (
-        <div className="glass border-b border-white/40 px-4 py-4 space-y-3">
+        <div className="glass border-b border-white/40 px-4 py-4 space-y-4">
+          {/* Mode toggle */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t('claudeApiKey', lang)}</label>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
-              placeholder="sk-ant-..."
-              className="w-full px-3 py-2.5 bg-white/60 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition-all"
-            />
-          </div>
-          {speech.useWhisper && (
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">{t('whisperApiKey', lang)}</label>
-              <input
-                type="password"
-                value={whisperKey}
-                onChange={e => setWhisperKey(e.target.value)}
-                placeholder="sk-..."
-                className="w-full px-3 py-2.5 bg-white/60 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition-all"
-              />
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              {lang === 'ko' ? '변환 모드' : 'Conversion Mode'}
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setConversionMode('free'); localStorage.setItem('medvoice_mode', 'free') }}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${conversionMode === 'free' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md' : 'bg-white/60 border border-gray-200 text-gray-500 hover:border-emerald-300'}`}
+              >
+                <div className="flex flex-col items-center gap-0.5">
+                  <span>{lang === 'ko' ? 'Free 모드' : 'Free Mode'}</span>
+                  <span className={`text-[10px] ${conversionMode === 'free' ? 'text-emerald-100' : 'text-gray-400'}`}>
+                    {lang === 'ko' ? 'API 키 불필요' : 'No API key needed'}
+                  </span>
+                </div>
+              </button>
+              <button
+                onClick={() => { setConversionMode('ai'); localStorage.setItem('medvoice_mode', 'ai') }}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${conversionMode === 'ai' ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md' : 'bg-white/60 border border-gray-200 text-gray-500 hover:border-indigo-300'}`}
+              >
+                <div className="flex flex-col items-center gap-0.5">
+                  <span>{lang === 'ko' ? 'AI 모드' : 'AI Mode'}</span>
+                  <span className={`text-[10px] ${conversionMode === 'ai' ? 'text-indigo-200' : 'text-gray-400'}`}>
+                    Claude API
+                  </span>
+                </div>
+              </button>
             </div>
+          </div>
+
+          {/* API keys — only shown in AI mode */}
+          {conversionMode === 'ai' && (
+            <>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">{t('claudeApiKey', lang)}</label>
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={e => setApiKey(e.target.value)}
+                  placeholder="sk-ant-..."
+                  className="w-full px-3 py-2.5 bg-white/60 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition-all"
+                />
+              </div>
+              {speech.useWhisper && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1.5">{t('whisperApiKey', lang)}</label>
+                  <input
+                    type="password"
+                    value={whisperKey}
+                    onChange={e => setWhisperKey(e.target.value)}
+                    placeholder="sk-..."
+                    className="w-full px-3 py-2.5 bg-white/60 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition-all"
+                  />
+                </div>
+              )}
+              <p className="text-xs text-gray-400">{t('apiKeyNote', lang)}</p>
+            </>
           )}
-          <p className="text-xs text-gray-400">{t('apiKeyNote', lang)}</p>
+
+          {conversionMode === 'free' && (
+            <p className="text-xs text-gray-400">
+              {lang === 'ko'
+                ? 'Free 모드는 내장 의학 용어 사전으로 변환합니다. 더 정확한 변환은 AI 모드를 사용하세요.'
+                : 'Free mode uses a built-in medical dictionary. For more accurate conversion, use AI mode.'}
+            </p>
+          )}
         </div>
       )}
 
@@ -578,7 +632,9 @@ function MainApp({ lang, visitorCount }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </span>
-                {lang === 'ko' ? 'AI 변환 결과' : 'AI Conversion Results'}
+                {conversionMode === 'ai'
+                  ? (lang === 'ko' ? 'AI 변환 결과' : 'AI Conversion Results')
+                  : (lang === 'ko' ? '용어 변환 결과 (Free)' : 'Term Conversion (Free)')}
               </h3>
               <button onClick={() => setShowAiResult(false)} className="text-gray-400 hover:text-gray-600 p-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
