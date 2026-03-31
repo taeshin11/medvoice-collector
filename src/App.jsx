@@ -498,16 +498,45 @@ function MainApp({ lang, visitorCount, onLangChange }) {
           )}
         </section>
 
-        {/* Right: Data Table */}
+        {/* Right: Patient Data */}
         <section ref={tableRef} className={`lg:w-[62%] flex flex-col card overflow-hidden transition-all duration-500 ${justUpdated ? 'ring-2 ring-indigo-400 ring-offset-2' : ''}`}>
           <div className="p-4 overflow-auto flex-1">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
               </svg>
-              {t('patientDataTable', lang)}
+              {t('patientDataTable', lang)} — {activePatient.name || activePatient.patientId || `Patient ${activeIdx + 1}`}
             </h2>
-            <div className="overflow-x-auto rounded-xl border border-gray-200/60">
+
+            {/* Mobile: Card View */}
+            <div className="lg:hidden space-y-2">
+              {COLUMNS.map(col => {
+                const val = activePatient[col.key] || ''
+                const hasValue = !!val
+                return (
+                  <div
+                    key={col.key}
+                    className={`rounded-xl border p-3 transition-all duration-500 ${hasValue && justUpdated ? 'border-indigo-300 bg-indigo-50/60 card-field-flash' : hasValue ? 'border-indigo-200/60 bg-white' : 'border-gray-100 bg-white/50'}`}
+                  >
+                    <label className={`block text-[10px] font-bold uppercase tracking-wider mb-1 ${hasValue ? 'text-indigo-500' : 'text-gray-300'}`}>
+                      {col.label}
+                    </label>
+                    <input
+                      value={val}
+                      onChange={e => {
+                        const v = e.target.value
+                        setPatients(prev => prev.map((p, i) => i === activeIdx ? { ...p, [col.key]: v } : p))
+                      }}
+                      placeholder={lang === 'ko' ? '입력하세요...' : 'Enter...'}
+                      className={`w-full bg-transparent text-sm outline-none ${hasValue ? 'text-gray-800' : 'text-gray-400'}`}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Desktop: Table View */}
+            <div className="hidden lg:block overflow-x-auto rounded-xl border border-gray-200/60">
               <table className="data-table w-full border-collapse min-w-[600px]">
                 <thead>
                   <tr>

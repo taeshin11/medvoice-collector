@@ -54,6 +54,15 @@ body {
   animation: pulse-rec 1.5s infinite;
 }
 
+/* Card field flash when data is added (mobile) */
+@keyframes field-flash {
+  0%, 100% { border-color: rgba(165, 180, 252, 0.6); }
+  50% { border-color: rgba(99, 102, 241, 0.8); background-color: rgba(238, 242, 255, 0.8); }
+}
+.card-field-flash {
+  animation: field-flash 0.8s ease-in-out 3;
+}
+
 /* Table row flash when data is added */
 @keyframes row-flash {
   0%, 100% { background-color: rgba(199, 210, 254, 0.3); }
