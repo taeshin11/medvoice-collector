@@ -93,7 +93,7 @@ export function useSpeechRecognition(onError, lang = 'ko') {
         isListeningRef.current = false
         stopTimer()
         onErrorRef.current?.('Microphone access denied')
-      } else if (event.error !== 'no-speech') {
+      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
         onErrorRef.current?.('Speech recognition error: ' + event.error)
       }
     }

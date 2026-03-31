@@ -5,7 +5,7 @@ import App from './App.jsx'
 
 const splash = document.createElement('div')
 splash.id = 'splash'
-splash.innerHTML = '<div class="logo">&#9670; SPINAI</div>'
+splash.innerHTML = '<div class="logo">MedVoice</div><div class="subtitle">AI Medical Voice Collector</div>'
 document.body.prepend(splash)
 
 setTimeout(() => {

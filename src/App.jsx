@@ -194,42 +194,36 @@ function MainApp({ lang, visitorCount }) {
   return (
     <>
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-blue-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-        <h1 className="text-lg font-bold text-blue-600 flex items-center gap-1">
-          <span className="text-xl">&#9670;</span>
-          <span>SPINAI</span>
-          <span className="text-gray-400 font-normal mx-1">·</span>
-          <span className="text-gray-700 font-semibold text-sm sm:text-base">MedVoice Collector</span>
-        </h1>
+      <header className="glass border-b border-white/60 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+            M
+          </div>
+          <span className="text-base font-semibold text-gray-800 tracking-tight">MedVoice</span>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowSettings(!showSettings)}
             aria-label={t('settings', lang)}
-            className="p-2 rounded-lg hover:bg-blue-50 text-gray-500 transition-colors"
+            className="p-2 rounded-xl hover:bg-white/60 text-gray-400 hover:text-gray-600 transition-all"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </button>
-          <button
-            onClick={addPatient}
-            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-          >
+          <button onClick={addPatient} className="btn-primary px-3 py-1.5 text-xs">
             {t('newPatient', lang)}
           </button>
           <div className="relative">
-            <button
-              onClick={() => setShowExport(!showExport)}
-              className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
-            >
+            <button onClick={() => setShowExport(!showExport)} className="btn-success px-3 py-1.5 text-xs">
               {t('export', lang)}
             </button>
             {showExport && (
-              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border py-1 z-50 min-w-[140px]" role="menu">
-                <button onClick={handleExportXlsx} role="menuitem" className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">{t('excelExport', lang)}</button>
-                <button onClick={handleExportCsv} role="menuitem" className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">{t('csvExport', lang)}</button>
-                <button onClick={handleCopy} role="menuitem" className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">{t('clipboardCopy', lang)}</button>
+              <div className="absolute right-0 top-full mt-2 card py-1 z-50 min-w-[160px] shadow-lg" role="menu">
+                <button onClick={handleExportXlsx} role="menuitem" className="w-full text-left px-4 py-2.5 text-sm text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">{t('excelExport', lang)}</button>
+                <button onClick={handleExportCsv} role="menuitem" className="w-full text-left px-4 py-2.5 text-sm text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">{t('csvExport', lang)}</button>
+                <button onClick={handleCopy} role="menuitem" className="w-full text-left px-4 py-2.5 text-sm text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">{t('clipboardCopy', lang)}</button>
               </div>
             )}
           </div>
@@ -238,26 +232,26 @@ function MainApp({ lang, visitorCount }) {
 
       {/* Settings panel */}
       {showSettings && (
-        <div className="bg-white border-b border-blue-100 px-4 py-4 space-y-3">
+        <div className="glass border-b border-white/40 px-4 py-4 space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">{t('claudeApiKey', lang)}</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t('claudeApiKey', lang)}</label>
             <input
               type="password"
               value={apiKey}
               onChange={e => setApiKey(e.target.value)}
               placeholder="sk-ant-..."
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full px-3 py-2.5 bg-white/60 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition-all"
             />
           </div>
           {speech.useWhisper && (
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">{t('whisperApiKey', lang)}</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">{t('whisperApiKey', lang)}</label>
               <input
                 type="password"
                 value={whisperKey}
                 onChange={e => setWhisperKey(e.target.value)}
                 placeholder="sk-..."
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-3 py-2.5 bg-white/60 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition-all"
               />
             </div>
           )}
@@ -266,41 +260,46 @@ function MainApp({ lang, visitorCount }) {
       )}
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col lg:flex-row">
+      <main className="flex-1 flex flex-col lg:flex-row gap-3 p-3">
         {/* Left: Transcript + Controls */}
-        <section className="lg:w-[40%] flex flex-col border-b lg:border-b-0 lg:border-r border-blue-100 bg-white/40">
-          <div className="flex-1 p-4 overflow-y-auto max-h-[40vh] lg:max-h-[calc(100vh-220px)]">
-            <h2 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
-              <span>&#127897;</span> {t('realTimeConversation', lang)}
+        <section className="lg:w-[38%] flex flex-col card overflow-hidden">
+          <div className="flex-1 p-4 overflow-y-auto max-h-[35vh] lg:max-h-[calc(100vh-240px)]">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+                {t('realTimeConversation', lang)}
+              </h2>
               {speech.isListening && (
-                <span className="inline-flex items-center gap-1 text-red-500 text-xs font-mono">
-                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full recording-pulse inline-block"></span>
-                  REC {formatDuration(speech.duration)}
+                <span className="inline-flex items-center gap-1.5 text-red-500 text-xs font-mono bg-red-50 px-2 py-1 rounded-full">
+                  <span className="w-2 h-2 bg-red-500 rounded-full recording-pulse inline-block"></span>
+                  {formatDuration(speech.duration)}
                 </span>
               )}
-            </h2>
-            <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+            </div>
+            <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
               {activePatient.transcript && (
-                <div className="text-gray-400 mb-2">{activePatient.transcript}</div>
+                <div className="text-gray-300 mb-2 pb-2 border-b border-gray-100">{activePatient.transcript}</div>
               )}
-              {speech.transcript && <span>{speech.transcript}</span>}
+              {speech.transcript && <span className="text-gray-700">{speech.transcript}</span>}
               {speech.interimText && (
-                <span className="text-blue-400 italic">{speech.interimText}</span>
+                <span className="text-indigo-400 italic">{speech.interimText}</span>
               )}
               {!activePatient.transcript && !speech.transcript && !speech.interimText && (
-                <p className="text-gray-300 italic">{t('transcriptPlaceholder', lang)}</p>
+                <p className="text-gray-300 italic text-center py-8">{t('transcriptPlaceholder', lang)}</p>
               )}
               <div ref={transcriptEndRef} />
             </div>
           </div>
 
           {/* Controls */}
-          <div className="p-4 border-t border-blue-100 bg-white/60 flex items-center justify-center gap-4">
+          <div className="p-5 border-t border-gray-100/50 flex items-center justify-center gap-4 bg-gradient-to-t from-white/40 to-transparent">
             {!speech.isListening ? (
               <button
                 onClick={() => speech.start()}
                 aria-label={t('startRecording', lang)}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-all shadow-lg active:scale-95"
+                className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center hover:from-indigo-600 hover:to-purple-700 transition-all shadow-xl mic-glow active:scale-95"
               >
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -313,9 +312,9 @@ function MainApp({ lang, visitorCount }) {
                   <button
                     onClick={() => speech.pause()}
                     aria-label={t('pause', lang)}
-                    className="w-14 h-14 rounded-full bg-yellow-500 text-white flex items-center justify-center hover:bg-yellow-600 transition-all shadow-md active:scale-95"
+                    className="w-14 h-14 rounded-full bg-amber-400 text-white flex items-center justify-center hover:bg-amber-500 transition-all shadow-lg active:scale-95"
                   >
-                    <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                     </svg>
                   </button>
@@ -323,9 +322,9 @@ function MainApp({ lang, visitorCount }) {
                   <button
                     onClick={() => speech.resume()}
                     aria-label={t('resume', lang)}
-                    className="w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-all shadow-md active:scale-95"
+                    className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-all shadow-lg active:scale-95"
                   >
-                    <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
                   </button>
@@ -333,18 +332,18 @@ function MainApp({ lang, visitorCount }) {
                 <button
                   onClick={handleStop}
                   aria-label={t('stopAndConvert', lang)}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-lg recording-pulse active:scale-95"
+                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center hover:from-red-600 hover:to-rose-700 transition-all shadow-xl recording-pulse active:scale-95"
                 >
                   <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 6h12v12H6z"/>
+                    <rect x="7" y="7" width="10" height="10" rx="2"/>
                   </svg>
                 </button>
               </>
             )}
           </div>
           {isConverting && (
-            <div className="text-center py-2 text-xs text-blue-600 bg-blue-50 border-t border-blue-100 flex items-center justify-center gap-2">
-              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <div className="text-center py-2.5 text-xs text-indigo-600 bg-indigo-50/60 border-t border-indigo-100/40 flex items-center justify-center gap-2">
+              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
               </svg>
@@ -352,19 +351,22 @@ function MainApp({ lang, visitorCount }) {
             </div>
           )}
           {speech.useWhisper && (
-            <div className="text-center py-1 text-xs text-amber-600 bg-amber-50">
+            <div className="text-center py-1.5 text-xs text-amber-600 bg-amber-50/60 border-t border-amber-100/30">
               {t('iosMode', lang)}
             </div>
           )}
         </section>
 
         {/* Right: Data Table */}
-        <section className="lg:w-[60%] flex flex-col bg-white/30">
+        <section className="lg:w-[62%] flex flex-col card overflow-hidden">
           <div className="p-4 overflow-auto flex-1">
-            <h2 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
-              <span>&#128202;</span> {t('patientDataTable', lang)}
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+              </svg>
+              {t('patientDataTable', lang)}
             </h2>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-xl border border-gray-200/60">
               <table className="data-table w-full border-collapse min-w-[600px]">
                 <thead>
                   <tr>
@@ -378,7 +380,7 @@ function MainApp({ lang, visitorCount }) {
                   {patients.map((patient, pIdx) => (
                     <tr
                       key={patient.id}
-                      className={`${pIdx === activeIdx ? 'bg-blue-50/50' : 'hover:bg-gray-50/50'} cursor-pointer`}
+                      className={`${pIdx === activeIdx ? 'bg-indigo-50/40' : ''} cursor-pointer transition-colors`}
                       onClick={() => {
                         setActiveIdx(pIdx)
                         if (!speech.isListening) speech.resetTranscript()
@@ -388,9 +390,11 @@ function MainApp({ lang, visitorCount }) {
                         <button
                           onClick={(e) => { e.stopPropagation(); deletePatient(pIdx) }}
                           aria-label={`${t('deletePatient', lang)} ${pIdx + 1}`}
-                          className="text-gray-300 hover:text-red-500 transition-colors text-xs px-1 py-1"
+                          className="text-gray-300 hover:text-red-400 transition-colors text-xs px-1.5 py-1.5"
                         >
-                          &#10005;
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </button>
                       </td>
                       {COLUMNS.map(col => (
@@ -401,7 +405,7 @@ function MainApp({ lang, visitorCount }) {
                               const val = e.target.value
                               setPatients(prev => prev.map((p, i) => i === pIdx ? { ...p, [col.key]: val } : p))
                             }}
-                            aria-label={`${col.label} - ${t('deletePatient', lang).replace('삭제', '').replace('Delete', '').trim()} ${pIdx + 1}`}
+                            aria-label={`${col.label} - Patient ${pIdx + 1}`}
                             placeholder={col.label}
                           />
                         </td>
@@ -416,8 +420,8 @@ function MainApp({ lang, visitorCount }) {
       </main>
 
       {/* Patient tabs */}
-      <nav className="bg-white/80 border-t border-blue-100 px-4 py-2 flex items-center gap-2 overflow-x-auto" aria-label={t('patientList', lang)}>
-        <span className="text-xs text-gray-400 shrink-0">{t('patientList', lang)}</span>
+      <nav className="px-4 py-2.5 flex items-center gap-2 overflow-x-auto" aria-label={t('patientList', lang)}>
+        <span className="text-xs text-gray-400 shrink-0 font-medium">{t('patientList', lang)}</span>
         {patients.map((p, idx) => (
           <button
             key={p.id}
@@ -425,11 +429,7 @@ function MainApp({ lang, visitorCount }) {
               setActiveIdx(idx)
               if (!speech.isListening) speech.resetTranscript()
             }}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
-              idx === activeIdx
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            className={`patient-pill shrink-0 ${idx === activeIdx ? 'active' : ''}`}
           >
             {p.name || p.patientId || `Patient ${idx + 1}`}
           </button>
@@ -437,7 +437,7 @@ function MainApp({ lang, visitorCount }) {
         <button
           onClick={addPatient}
           aria-label={t('addPatient', lang)}
-          className="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 text-lg shrink-0"
+          className="w-7 h-7 rounded-full bg-white/70 border border-gray-200 text-gray-400 flex items-center justify-center hover:bg-indigo-50 hover:text-indigo-500 hover:border-indigo-200 text-sm shrink-0 transition-all"
         >
           +
         </button>
@@ -451,33 +451,35 @@ function MainApp({ lang, visitorCount }) {
         <button
           onClick={() => setShowFeedback(true)}
           aria-label={t('sendFeedback', lang)}
-          className="fixed bottom-20 right-4 w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 transition-all z-50"
+          className="fixed bottom-20 right-4 w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg flex items-center justify-center hover:shadow-xl hover:scale-105 transition-all z-50"
         >
-          <span className="text-xl">&#128172;</span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
         </button>
       )}
 
       {/* Feedback modal */}
       {showFeedback && (
         <div
-          className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
           onClick={() => setShowFeedback(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="feedback-dialog-title"
         >
-          <div className="bg-white rounded-xl p-4 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 id="feedback-dialog-title" className="font-semibold text-gray-700 mb-2">{t('feedbackTitle', lang)}</h3>
+          <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h3 id="feedback-dialog-title" className="font-semibold text-gray-800 mb-3">{t('feedbackTitle', lang)}</h3>
             <textarea
               value={feedbackText}
               onChange={e => setFeedbackText(e.target.value)}
               placeholder={t('feedbackPlaceholder', lang)}
-              className="w-full border rounded-lg p-3 text-sm resize-none h-24 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none h-24 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition-all"
               autoFocus
             />
             <div className="flex gap-2 mt-3">
-              <button type="button" onClick={() => setShowFeedback(false)} className="flex-1 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm">{t('cancel', lang)}</button>
-              <button type="button" onClick={handleFeedback} className="flex-1 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium">{t('send', lang)}</button>
+              <button type="button" onClick={() => setShowFeedback(false)} className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium hover:bg-gray-200 transition-colors">{t('cancel', lang)}</button>
+              <button type="button" onClick={handleFeedback} className="flex-1 py-2.5 rounded-xl btn-primary text-sm">{t('send', lang)}</button>
             </div>
           </div>
         </div>
@@ -485,7 +487,7 @@ function MainApp({ lang, visitorCount }) {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm shadow-lg z-50 toast-animate" role="status">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-900/90 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl text-sm shadow-xl z-50 toast-animate" role="status">
           {toast}
         </div>
       )}
@@ -515,12 +517,12 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <div className="min-h-screen flex flex-col">
-        {/* Language selector - floating */}
-        <div className="fixed top-[4.5rem] right-4 z-50">
+        {/* Language selector */}
+        <div className="fixed top-16 right-3 z-50">
           <select
             value={lang}
             onChange={e => handleLangChange(e.target.value)}
-            className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-lg px-2 py-1 text-xs text-gray-600 shadow-sm cursor-pointer focus:ring-2 focus:ring-blue-500 outline-none"
+            className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs text-gray-500 shadow-sm cursor-pointer focus:ring-2 focus:ring-indigo-400 outline-none transition-all hover:border-indigo-300"
             aria-label="Language"
           >
             {getSupportedLangs().map(l => (
