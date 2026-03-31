@@ -122,9 +122,42 @@ export function convertLocal(transcript) {
     }
   }
 
-  // Check if anything was found
+  // Always include the full transcript in notes so nothing is lost
+  // Split into sentences and put unmatched content into notes
+  const matchedSpans = []
+  for (const pattern of PATTERNS) {
+    for (const m of transcript.matchAll(new RegExp(pattern.re.source, 'g'))) {
+      matchedSpans.push([m.index, m.index + m[0].length])
+    }
+  }
+
+  // Collect unmatched text segments as general notes
+  const sentences = transcript.split(/[.。,，!！?？\n]+/).map(s => s.trim()).filter(Boolean)
+  const extraNotes = []
+  for (const sentence of sentences) {
+    const idx = transcript.indexOf(sentence)
+    const isMatched = matchedSpans.some(([s, e]) => idx >= s && idx < e || (idx + sentence.length > s && idx < e))
+    if (!isMatched && sentence.length > 1) {
+      extraNotes.push(sentence)
+    }
+  }
+
+  // If nothing was matched by patterns, put everything into notes
   const hasResults = Object.values(result).some(arr => arr.length > 0)
-  if (!hasResults) return null
+  if (!hasResults) {
+    return {
+      cc: '',
+      presentIllness: '',
+      associatedSx: '',
+      pastHx: '',
+      diagnosis: '',
+      plan: '',
+      notes: transcript.trim(),
+    }
+  }
+
+  // Combine matched terms + unmatched content in notes
+  const allNotes = [...result.notes, ...extraNotes].filter(Boolean)
 
   return {
     cc: result.cc.join(', '),
@@ -133,6 +166,6 @@ export function convertLocal(transcript) {
     pastHx: result.pastHx.join(', '),
     diagnosis: result.diagnosis.join(', '),
     plan: result.plan.join(', '),
-    notes: result.notes.join(', '),
+    notes: allNotes.length > 0 ? allNotes.join(' / ') : '',
   }
 }

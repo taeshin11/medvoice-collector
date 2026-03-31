@@ -164,9 +164,7 @@ function MainApp({ lang, visitorCount }) {
               notes: [p.notes, terms.notes].filter(Boolean).join(' '),
             }
           }))
-          showToast(conversionMode === 'ai' ? t('conversionComplete', lang) : (lang === 'ko' ? '용어 변환 완료 (Free 모드)' : 'Terms converted (Free mode)'))
-        } else {
-          showToast(lang === 'ko' ? '인식된 의학 용어가 없습니다' : 'No medical terms detected')
+          showToast(conversionMode === 'ai' ? t('conversionComplete', lang) : (lang === 'ko' ? '정리 완료 (Free 모드)' : 'Organized (Free mode)'))
         }
       } catch (err) {
         showToast(t('conversionFailed', lang) + err.message)
