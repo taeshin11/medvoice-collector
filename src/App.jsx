@@ -49,8 +49,14 @@ function ScrollToTop() {
   return null
 }
 
-function MainApp({ lang, visitorCount }) {
-  const [patients, setPatients] = useState(() => safeParse('medvoice_patients', [DEFAULT_PATIENT()]))
+function MainApp({ lang, visitorCount, onLangChange }) {
+  const [patients, setPatients] = useState(() => {
+    const saved = safeParse('medvoice_patients', null)
+    if (saved && saved.length > 0) return saved
+    const first = DEFAULT_PATIENT()
+    first.patientId = 'P001'
+    return [first]
+  })
   const [activeIdx, setActiveIdx] = useState(0)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('claude_api_key') || '')
   const [whisperKey, setWhisperKey] = useState(() => localStorage.getItem('openai_api_key') || '')
@@ -180,7 +186,7 @@ function MainApp({ lang, visitorCount }) {
     }
 
     speech.resetTranscript()
-  }, [speech, apiKey, patients, updateField, showToast, lang])
+  }, [speech, apiKey, patients, updateField, showToast, lang, conversionMode])
 
   const handleExportXlsx = () => {
     exportXlsx(patients)
@@ -223,7 +229,17 @@ function MainApp({ lang, visitorCount }) {
             {conversionMode === 'free' ? 'FREE' : 'AI'}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <select
+            value={lang}
+            onChange={e => onLangChange(e.target.value)}
+            className="bg-transparent border border-gray-200 rounded-lg px-1.5 py-1.5 text-[11px] text-gray-500 cursor-pointer focus:ring-1 focus:ring-indigo-400 outline-none"
+            aria-label="Language"
+          >
+            {getSupportedLangs().map(l => (
+              <option key={l.code} value={l.code}>{l.label}</option>
+            ))}
+          </select>
           <button
             onClick={() => setShowSettings(!showSettings)}
             aria-label={t('settings', lang)}
@@ -358,7 +374,7 @@ function MainApp({ lang, visitorCount }) {
               </button>
             )}
             <button onClick={handleStop} className="px-3 py-1 rounded-lg bg-white text-red-600 text-xs font-semibold hover:bg-red-50 transition-all">
-              {lang === 'ko' ? '중지 & AI 변환' : 'Stop & Convert'}
+              {lang === 'ko' ? '중지 & 변환' : 'Stop & Convert'}
             </button>
           </div>
         </div>
@@ -477,7 +493,7 @@ function MainApp({ lang, visitorCount }) {
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              {lang === 'ko' ? 'AI 변환 결과 보기' : 'View AI Results'}
+              {lang === 'ko' ? '변환 결과 보기' : 'View Results'}
             </button>
           )}
         </section>
@@ -729,22 +745,8 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <div className="min-h-screen flex flex-col">
-        {/* Language selector */}
-        <div className="fixed top-16 right-3 z-50">
-          <select
-            value={lang}
-            onChange={e => handleLangChange(e.target.value)}
-            className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs text-gray-500 shadow-sm cursor-pointer focus:ring-2 focus:ring-indigo-400 outline-none transition-all hover:border-indigo-300"
-            aria-label="Language"
-          >
-            {getSupportedLangs().map(l => (
-              <option key={l.code} value={l.code}>{l.label}</option>
-            ))}
-          </select>
-        </div>
-
         <Routes>
-          <Route path="/" element={<MainApp lang={lang} visitorCount={visitorCount} />} />
+          <Route path="/" element={<MainApp lang={lang} visitorCount={visitorCount} onLangChange={handleLangChange} />} />
           <Route path="/about" element={<About lang={lang} visitorCount={visitorCount} />} />
           <Route path="/how-to-use" element={<HowToUse lang={lang} visitorCount={visitorCount} />} />
           <Route path="/privacy" element={<Privacy lang={lang} visitorCount={visitorCount} />} />
