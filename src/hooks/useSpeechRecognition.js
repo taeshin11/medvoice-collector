@@ -9,7 +9,7 @@ function hasWebSpeechAPI() {
   return !!(window.SpeechRecognition || window.webkitSpeechRecognition)
 }
 
-export function useSpeechRecognition(onError) {
+export function useSpeechRecognition(onError, lang = 'ko') {
   const [isListening, setIsListening] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [transcript, setTranscript] = useState('')
@@ -22,7 +22,18 @@ export function useSpeechRecognition(onError) {
   const timerRef = useRef(null)
   const startTimeRef = useRef(null)
   const onErrorRef = useRef(onError)
+  const isListeningRef = useRef(false)
+  const isPausedRef = useRef(false)
+  const chunkIntervalRef = useRef(null)
   onErrorRef.current = onError
+
+  useEffect(() => {
+    isListeningRef.current = isListening
+  }, [isListening])
+
+  useEffect(() => {
+    isPausedRef.current = isPaused
+  }, [isPaused])
 
   useEffect(() => {
     if (isIOSSafari() && !hasWebSpeechAPI()) {
@@ -32,6 +43,7 @@ export function useSpeechRecognition(onError) {
 
   const startTimer = useCallback(() => {
     startTimeRef.current = Date.now() - duration * 1000
+    if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(() => {
       setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000))
     }, 1000)
@@ -44,6 +56,8 @@ export function useSpeechRecognition(onError) {
     }
   }, [])
 
+  const sttLang = lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'en' ? 'en-US' : 'ko-KR'
+
   const startWebSpeech = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
@@ -54,7 +68,7 @@ export function useSpeechRecognition(onError) {
     const recognition = new SpeechRecognition()
     recognition.continuous = true
     recognition.interimResults = true
-    recognition.lang = 'ko-KR'
+    recognition.lang = sttLang
 
     recognition.onresult = (event) => {
       let interim = ''
@@ -76,17 +90,16 @@ export function useSpeechRecognition(onError) {
     recognition.onerror = (event) => {
       if (event.error === 'not-allowed') {
         setIsListening(false)
+        isListeningRef.current = false
         stopTimer()
-        onErrorRef.current?.('마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크를 허용해주세요.')
-      } else if (event.error === 'no-speech') {
-        // ignore, will restart
-      } else {
-        onErrorRef.current?.('음성 인식 오류: ' + event.error)
+        onErrorRef.current?.('Microphone access denied')
+      } else if (event.error !== 'no-speech') {
+        onErrorRef.current?.('Speech recognition error: ' + event.error)
       }
     }
 
     recognition.onend = () => {
-      if (recognitionRef.current && isListening && !isPaused) {
+      if (recognitionRef.current && isListeningRef.current && !isPausedRef.current) {
         try { recognition.start() } catch {}
       }
     }
@@ -94,7 +107,7 @@ export function useSpeechRecognition(onError) {
     recognitionRef.current = recognition
     recognition.start()
     return true
-  }, [isListening, isPaused, stopTimer])
+  }, [sttLang, stopTimer])
 
   const startWhisper = useCallback(async () => {
     try {
@@ -117,7 +130,7 @@ export function useSpeechRecognition(onError) {
         const formData = new FormData()
         formData.append('file', blob, 'audio.webm')
         formData.append('model', 'whisper-1')
-        formData.append('language', 'ko')
+        formData.append('language', lang === 'ja' ? 'ja' : lang === 'zh' ? 'zh' : lang === 'en' ? 'en' : 'ko')
 
         try {
           const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
@@ -135,24 +148,24 @@ export function useSpeechRecognition(onError) {
       mediaRecorderRef.current = recorder
       recorder.start()
 
-      // Send chunks every 5 seconds for near-realtime
-      const chunkInterval = setInterval(() => {
+      chunkIntervalRef.current = setInterval(() => {
         if (recorder.state === 'recording') {
           recorder.stop()
           recorder.start()
         }
       }, 5000)
-      mediaRecorderRef.current._chunkInterval = chunkInterval
 
       return true
     } catch {
       return false
     }
-  }, [])
+  }, [lang])
 
   const start = useCallback(async () => {
     setIsListening(true)
+    isListeningRef.current = true
     setIsPaused(false)
+    isPausedRef.current = false
     startTimer()
 
     if (useWhisper) {
@@ -165,7 +178,9 @@ export function useSpeechRecognition(onError) {
 
   const stop = useCallback(() => {
     setIsListening(false)
+    isListeningRef.current = false
     setIsPaused(false)
+    isPausedRef.current = false
     stopTimer()
     setInterimText('')
 
@@ -175,8 +190,12 @@ export function useSpeechRecognition(onError) {
       recognitionRef.current = null
     }
 
+    if (chunkIntervalRef.current) {
+      clearInterval(chunkIntervalRef.current)
+      chunkIntervalRef.current = null
+    }
+
     if (mediaRecorderRef.current) {
-      clearInterval(mediaRecorderRef.current._chunkInterval)
       if (mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop()
       }
@@ -187,6 +206,7 @@ export function useSpeechRecognition(onError) {
 
   const pause = useCallback(() => {
     setIsPaused(true)
+    isPausedRef.current = true
     stopTimer()
     if (recognitionRef.current) {
       recognitionRef.current.onend = null
@@ -199,6 +219,7 @@ export function useSpeechRecognition(onError) {
 
   const resume = useCallback(() => {
     setIsPaused(false)
+    isPausedRef.current = false
     startTimer()
     if (useWhisper) {
       if (mediaRecorderRef.current?.state === 'paused') {

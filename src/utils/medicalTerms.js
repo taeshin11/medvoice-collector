@@ -47,9 +47,12 @@ ${transcript}`
   }
 
   const result = await response.json()
+  if (!result.content || !result.content[0] || !result.content[0].text) {
+    throw new Error('Invalid API response')
+  }
   const text = result.content[0].text
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  const jsonMatch = text.match(/\{[\s\S]*?\}/)
   if (!jsonMatch) throw new Error('No JSON in response')
 
   return JSON.parse(jsonMatch[0])

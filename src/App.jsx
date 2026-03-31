@@ -1,9 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { useSpeechRecognition } from './hooks/useSpeechRecognition'
 import { convertToMedicalTerms } from './utils/medicalTerms'
 import { exportXlsx, exportCsv, copyToClipboard, COLUMNS } from './utils/exportData'
 import { sendAnalytics } from './utils/analytics'
+import { t, getLang, setLang, getSupportedLangs } from './i18n/translations'
+import Footer from './components/Footer'
+import About from './pages/About'
+import HowToUse from './pages/HowToUse'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 
 const DEFAULT_PATIENT = () => ({
   id: uuidv4(),
@@ -35,7 +42,13 @@ function safeParse(key, fallback) {
   }
 }
 
-export default function App() {
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
+
+function MainApp({ lang, visitorCount }) {
   const [patients, setPatients] = useState(() => safeParse('medvoice_patients', [DEFAULT_PATIENT()]))
   const [activeIdx, setActiveIdx] = useState(0)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('claude_api_key') || '')
@@ -46,12 +59,6 @@ export default function App() {
   const [showFeedback, setShowFeedback] = useState(false)
   const [feedbackText, setFeedbackText] = useState('')
   const [showExport, setShowExport] = useState(false)
-  const [visitorCount] = useState(() => {
-    const c = parseInt(localStorage.getItem('medvoice_visitors') || '0')
-    const newC = c + 1
-    localStorage.setItem('medvoice_visitors', String(newC))
-    return newC
-  })
   const transcriptEndRef = useRef(null)
   const activeIdxRef = useRef(activeIdx)
   activeIdxRef.current = activeIdx
@@ -61,14 +68,12 @@ export default function App() {
     setTimeout(() => setToast(''), 3000)
   }, [])
 
-  const speech = useSpeechRecognition(showToast)
+  const speech = useSpeechRecognition(showToast, lang)
 
-  // Save patients to localStorage
   useEffect(() => {
     localStorage.setItem('medvoice_patients', JSON.stringify(patients))
   }, [patients])
 
-  // Save API keys
   useEffect(() => {
     if (apiKey) localStorage.setItem('claude_api_key', apiKey)
   }, [apiKey])
@@ -76,12 +81,10 @@ export default function App() {
     if (whisperKey) localStorage.setItem('openai_api_key', whisperKey)
   }, [whisperKey])
 
-  // Auto-scroll transcript
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [speech.transcript, speech.interimText])
 
-  // Escape key to close modals
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'Escape') {
@@ -94,12 +97,10 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  // Update active patient field
   const updateField = useCallback((field, value) => {
     setPatients(prev => prev.map((p, i) => i === activeIdxRef.current ? { ...p, [field]: value } : p))
   }, [])
 
-  // Add new patient
   const addPatient = useCallback(() => {
     const p = DEFAULT_PATIENT()
     p.patientId = `P${String(patients.length + 1).padStart(3, '0')}`
@@ -108,17 +109,15 @@ export default function App() {
     speech.resetTranscript()
   }, [patients.length, speech])
 
-  // Delete patient
   const deletePatient = useCallback((idx) => {
     if (patients.length <= 1) {
-      showToast('최소 1명의 환자가 필요합니다')
+      showToast(t('minOnePatient', lang))
       return
     }
     setPatients(prev => prev.filter((_, i) => i !== idx))
     setActiveIdx(prev => prev >= idx ? Math.max(0, prev - 1) : prev)
-  }, [patients.length, showToast])
+  }, [patients.length, showToast, lang])
 
-  // Handle stop — convert + analytics
   const handleStop = useCallback(async () => {
     const capturedIdx = activeIdxRef.current
     speech.stop()
@@ -151,51 +150,49 @@ export default function App() {
               notes: [p.notes, terms.notes].filter(Boolean).join(' '),
             }
           }))
-          showToast('AI 변환 완료!')
+          showToast(t('conversionComplete', lang))
         }
       } catch (err) {
-        showToast('AI 변환 실패: ' + err.message)
+        showToast(t('conversionFailed', lang) + err.message)
       }
       setIsConverting(false)
     } else if (!apiKey && fullTranscript.trim()) {
-      showToast('Claude API 키를 설정해주세요')
+      showToast(t('setApiKey', lang))
     }
 
     speech.resetTranscript()
-  }, [speech, apiKey, patients, updateField, showToast])
+  }, [speech, apiKey, patients, updateField, showToast, lang])
 
-  // Export handlers
   const handleExportXlsx = () => {
     exportXlsx(patients)
     sendAnalytics({ sessionId: 'export', patientCount: patients.length, duration: 0, termsConverted: 0 })
     setShowExport(false)
-    showToast('XLSX 다운로드 완료!')
+    showToast(t('xlsxDownloaded', lang))
   }
   const handleExportCsv = () => {
     exportCsv(patients)
     sendAnalytics({ sessionId: 'export', patientCount: patients.length, duration: 0, termsConverted: 0 })
     setShowExport(false)
-    showToast('CSV 다운로드 완료!')
+    showToast(t('csvDownloaded', lang))
   }
   const handleCopy = async () => {
     await copyToClipboard(patients)
     setShowExport(false)
-    showToast('클립보드에 복사 완료!')
+    showToast(t('copiedToClipboard', lang))
   }
 
-  // Feedback submit
   const handleFeedback = () => {
     if (!feedbackText.trim()) return
     window.open(`mailto:taeshinkim11@gmail.com?subject=MedVoice Feedback&body=${encodeURIComponent(feedbackText)}`)
     setFeedbackText('')
     setShowFeedback(false)
-    showToast('감사합니다! 피드백이 전달되었습니다')
+    showToast(t('feedbackSent', lang))
   }
 
   const activePatient = patients[activeIdx] || patients[0]
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-blue-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <h1 className="text-lg font-bold text-blue-600 flex items-center gap-1">
@@ -207,7 +204,7 @@ export default function App() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowSettings(!showSettings)}
-            aria-label="설정"
+            aria-label={t('settings', lang)}
             className="p-2 rounded-lg hover:bg-blue-50 text-gray-500 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,20 +216,20 @@ export default function App() {
             onClick={addPatient}
             className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
           >
-            + 새 환자
+            {t('newPatient', lang)}
           </button>
           <div className="relative">
             <button
               onClick={() => setShowExport(!showExport)}
               className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
             >
-              내보내기
+              {t('export', lang)}
             </button>
             {showExport && (
-              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border py-1 z-50 min-w-[140px]">
-                <button onClick={handleExportXlsx} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">.xlsx (엑셀)</button>
-                <button onClick={handleExportCsv} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">.csv</button>
-                <button onClick={handleCopy} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">클립보드 복사</button>
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border py-1 z-50 min-w-[140px]" role="menu">
+                <button onClick={handleExportXlsx} role="menuitem" className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">{t('excelExport', lang)}</button>
+                <button onClick={handleExportCsv} role="menuitem" className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">{t('csvExport', lang)}</button>
+                <button onClick={handleCopy} role="menuitem" className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">{t('clipboardCopy', lang)}</button>
               </div>
             )}
           </div>
@@ -243,7 +240,7 @@ export default function App() {
       {showSettings && (
         <div className="bg-white border-b border-blue-100 px-4 py-4 space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Claude API Key (의학 용어 변환)</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t('claudeApiKey', lang)}</label>
             <input
               type="password"
               value={apiKey}
@@ -254,7 +251,7 @@ export default function App() {
           </div>
           {speech.useWhisper && (
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">OpenAI API Key (iOS 음성인식 Whisper)</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">{t('whisperApiKey', lang)}</label>
               <input
                 type="password"
                 value={whisperKey}
@@ -264,7 +261,7 @@ export default function App() {
               />
             </div>
           )}
-          <p className="text-xs text-gray-400">API 키는 브라우저에만 저장되며 외부로 전송되지 않습니다.</p>
+          <p className="text-xs text-gray-400">{t('apiKeyNote', lang)}</p>
         </div>
       )}
 
@@ -274,7 +271,7 @@ export default function App() {
         <section className="lg:w-[40%] flex flex-col border-b lg:border-b-0 lg:border-r border-blue-100 bg-white/40">
           <div className="flex-1 p-4 overflow-y-auto max-h-[40vh] lg:max-h-[calc(100vh-220px)]">
             <h2 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
-              <span>&#127897;</span> 실시간 대화
+              <span>&#127897;</span> {t('realTimeConversation', lang)}
               {speech.isListening && (
                 <span className="inline-flex items-center gap-1 text-red-500 text-xs font-mono">
                   <span className="w-2.5 h-2.5 bg-red-500 rounded-full recording-pulse inline-block"></span>
@@ -291,7 +288,7 @@ export default function App() {
                 <span className="text-blue-400 italic">{speech.interimText}</span>
               )}
               {!activePatient.transcript && !speech.transcript && !speech.interimText && (
-                <p className="text-gray-300 italic">음성 인식을 시작하면 대화 내용이 여기에 표시됩니다...</p>
+                <p className="text-gray-300 italic">{t('transcriptPlaceholder', lang)}</p>
               )}
               <div ref={transcriptEndRef} />
             </div>
@@ -302,7 +299,7 @@ export default function App() {
             {!speech.isListening ? (
               <button
                 onClick={() => speech.start()}
-                aria-label="음성 인식 시작"
+                aria-label={t('startRecording', lang)}
                 className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-all shadow-lg active:scale-95"
               >
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
@@ -315,7 +312,7 @@ export default function App() {
                 {!speech.isPaused ? (
                   <button
                     onClick={() => speech.pause()}
-                    aria-label="일시정지"
+                    aria-label={t('pause', lang)}
                     className="w-14 h-14 rounded-full bg-yellow-500 text-white flex items-center justify-center hover:bg-yellow-600 transition-all shadow-md active:scale-95"
                   >
                     <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
@@ -325,7 +322,7 @@ export default function App() {
                 ) : (
                   <button
                     onClick={() => speech.resume()}
-                    aria-label="재개"
+                    aria-label={t('resume', lang)}
                     className="w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-all shadow-md active:scale-95"
                   >
                     <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
@@ -335,7 +332,7 @@ export default function App() {
                 )}
                 <button
                   onClick={handleStop}
-                  aria-label="중지 및 AI 변환"
+                  aria-label={t('stopAndConvert', lang)}
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-lg recording-pulse active:scale-95"
                 >
                   <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
@@ -351,12 +348,12 @@ export default function App() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
               </svg>
-              AI가 의학 용어로 변환 중...
+              {t('converting', lang)}
             </div>
           )}
           {speech.useWhisper && (
             <div className="text-center py-1 text-xs text-amber-600 bg-amber-50">
-              iOS 모드: Whisper API 사용 중
+              {t('iosMode', lang)}
             </div>
           )}
         </section>
@@ -365,15 +362,15 @@ export default function App() {
         <section className="lg:w-[60%] flex flex-col bg-white/30">
           <div className="p-4 overflow-auto flex-1">
             <h2 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
-              <span>&#128202;</span> 환자 데이터 테이블
+              <span>&#128202;</span> {t('patientDataTable', lang)}
             </h2>
             <div className="overflow-x-auto">
               <table className="data-table w-full border-collapse min-w-[600px]">
                 <thead>
                   <tr>
-                    <th className="w-8"></th>
+                    <th className="w-8" scope="col" aria-label="Actions"></th>
                     {COLUMNS.map(col => (
-                      <th key={col.key}>{col.label}</th>
+                      <th key={col.key} scope="col">{col.label}</th>
                     ))}
                   </tr>
                 </thead>
@@ -390,7 +387,7 @@ export default function App() {
                       <td className="text-center !p-0">
                         <button
                           onClick={(e) => { e.stopPropagation(); deletePatient(pIdx) }}
-                          aria-label={`환자 ${pIdx + 1} 삭제`}
+                          aria-label={`${t('deletePatient', lang)} ${pIdx + 1}`}
                           className="text-gray-300 hover:text-red-500 transition-colors text-xs px-1 py-1"
                         >
                           &#10005;
@@ -404,7 +401,7 @@ export default function App() {
                               const val = e.target.value
                               setPatients(prev => prev.map((p, i) => i === pIdx ? { ...p, [col.key]: val } : p))
                             }}
-                            aria-label={`${col.label} for patient ${pIdx + 1}`}
+                            aria-label={`${col.label} - ${t('deletePatient', lang).replace('삭제', '').replace('Delete', '').trim()} ${pIdx + 1}`}
                             placeholder={col.label}
                           />
                         </td>
@@ -419,8 +416,8 @@ export default function App() {
       </main>
 
       {/* Patient tabs */}
-      <nav className="bg-white/80 border-t border-blue-100 px-4 py-2 flex items-center gap-2 overflow-x-auto" aria-label="환자 목록">
-        <span className="text-xs text-gray-400 shrink-0">환자 목록:</span>
+      <nav className="bg-white/80 border-t border-blue-100 px-4 py-2 flex items-center gap-2 overflow-x-auto" aria-label={t('patientList', lang)}>
+        <span className="text-xs text-gray-400 shrink-0">{t('patientList', lang)}</span>
         {patients.map((p, idx) => (
           <button
             key={p.id}
@@ -439,7 +436,7 @@ export default function App() {
         ))}
         <button
           onClick={addPatient}
-          aria-label="새 환자 추가"
+          aria-label={t('addPatient', lang)}
           className="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 text-lg shrink-0"
         >
           +
@@ -447,15 +444,13 @@ export default function App() {
       </nav>
 
       {/* Footer */}
-      <footer className="bg-white/60 border-t border-blue-100 px-4 py-3 text-center text-xs text-gray-400">
-        Built by <span className="font-semibold text-blue-600">SPINAI</span> · spinaiceo@gmail.com · <span>&#128065;</span> {visitorCount} visitors
-      </footer>
+      <Footer lang={lang} visitorCount={visitorCount} />
 
-      {/* Feedback button — hidden during recording */}
+      {/* Feedback button */}
       {!speech.isListening && (
         <button
           onClick={() => setShowFeedback(true)}
-          aria-label="피드백 보내기"
+          aria-label={t('sendFeedback', lang)}
           className="fixed bottom-20 right-4 w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 transition-all z-50"
         >
           <span className="text-xl">&#128172;</span>
@@ -469,20 +464,20 @@ export default function App() {
           onClick={() => setShowFeedback(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="피드백"
+          aria-labelledby="feedback-dialog-title"
         >
           <div className="bg-white rounded-xl p-4 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="font-semibold text-gray-700 mb-2">피드백 보내기</h3>
+            <h3 id="feedback-dialog-title" className="font-semibold text-gray-700 mb-2">{t('feedbackTitle', lang)}</h3>
             <textarea
               value={feedbackText}
               onChange={e => setFeedbackText(e.target.value)}
-              placeholder="의견이나 개선 사항을 알려주세요..."
+              placeholder={t('feedbackPlaceholder', lang)}
               className="w-full border rounded-lg p-3 text-sm resize-none h-24 focus:ring-2 focus:ring-blue-500 outline-none"
               autoFocus
             />
             <div className="flex gap-2 mt-3">
-              <button onClick={() => setShowFeedback(false)} className="flex-1 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm">취소</button>
-              <button onClick={handleFeedback} className="flex-1 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium">전송</button>
+              <button type="button" onClick={() => setShowFeedback(false)} className="flex-1 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm">{t('cancel', lang)}</button>
+              <button type="button" onClick={handleFeedback} className="flex-1 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium">{t('send', lang)}</button>
             </div>
           </div>
         </div>
@@ -495,10 +490,53 @@ export default function App() {
         </div>
       )}
 
-      {/* Click outside to close export */}
       {showExport && (
         <div className="fixed inset-0 z-30" onClick={() => setShowExport(false)} />
       )}
-    </div>
+    </>
+  )
+}
+
+export default function App() {
+  const [lang, setCurrentLang] = useState(getLang)
+  const [visitorCount] = useState(() => {
+    const c = parseInt(localStorage.getItem('medvoice_visitors') || '0')
+    const newC = c + 1
+    localStorage.setItem('medvoice_visitors', String(newC))
+    return newC
+  })
+
+  const handleLangChange = (newLang) => {
+    setLang(newLang)
+    setCurrentLang(newLang)
+  }
+
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <div className="min-h-screen flex flex-col">
+        {/* Language selector - floating */}
+        <div className="fixed top-[4.5rem] right-4 z-50">
+          <select
+            value={lang}
+            onChange={e => handleLangChange(e.target.value)}
+            className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-lg px-2 py-1 text-xs text-gray-600 shadow-sm cursor-pointer focus:ring-2 focus:ring-blue-500 outline-none"
+            aria-label="Language"
+          >
+            {getSupportedLangs().map(l => (
+              <option key={l.code} value={l.code}>{l.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <Routes>
+          <Route path="/" element={<MainApp lang={lang} visitorCount={visitorCount} />} />
+          <Route path="/about" element={<About lang={lang} visitorCount={visitorCount} />} />
+          <Route path="/how-to-use" element={<HowToUse lang={lang} visitorCount={visitorCount} />} />
+          <Route path="/privacy" element={<Privacy lang={lang} visitorCount={visitorCount} />} />
+          <Route path="/terms" element={<Terms lang={lang} visitorCount={visitorCount} />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   )
 }
