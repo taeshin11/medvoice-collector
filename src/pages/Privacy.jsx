@@ -3,7 +3,7 @@ import PageLayout from '../components/PageLayout'
 
 const content = {
   en: {
-    lastUpdated: 'Last Updated: March 31, 2026',
+    lastUpdated: 'Last Updated: March 31, 2025',
     sections: [
       {
         title: '1. Introduction',
@@ -93,7 +93,7 @@ Since all personal data is stored locally on your device, you have complete cont
     ],
   },
   ko: {
-    lastUpdated: '최종 수정일: 2026년 3월 31일',
+    lastUpdated: '최종 수정일: 2025년 3월 31일',
     sections: [
       {
         title: '1. 소개',

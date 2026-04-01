@@ -3,7 +3,7 @@ import PageLayout from '../components/PageLayout'
 
 const content = {
   en: {
-    lastUpdated: 'Last Updated: March 31, 2026',
+    lastUpdated: 'Last Updated: March 31, 2025',
     sections: [
       {
         title: '1. Acceptance of Terms',
@@ -74,7 +74,7 @@ THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIN
     ],
   },
   ko: {
-    lastUpdated: '최종 수정일: 2026년 3월 31일',
+    lastUpdated: '최종 수정일: 2025년 3월 31일',
     sections: [
       {
         title: '1. 약관 동의',
