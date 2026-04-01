@@ -21,7 +21,7 @@ export default function About({ lang, visitorCount }) {
 
         <section className="mt-12 bg-white rounded-xl p-6 shadow-sm border border-blue-50">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            {lang === 'ko' ? '기술 스택' : lang === 'ja' ? '技術スタック' : lang === 'zh' ? '技术栈' : 'Technology Stack'}
+            {{ ko: '기술 스택', ja: '技術スタック', zh: '技术栈', es: 'Stack Tecnologico', de: 'Technologie-Stack', fr: 'Stack Technologique', pt: 'Stack Tecnologico' }[lang] || 'Technology Stack'}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
@@ -44,10 +44,10 @@ export default function About({ lang, visitorCount }) {
 
         <section className="mt-12 bg-white rounded-xl p-6 shadow-sm border border-blue-50">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            {lang === 'ko' ? '연락처' : lang === 'ja' ? 'お問い合わせ' : lang === 'zh' ? '联系方式' : 'Contact'}
+            {{ ko: '연락처', ja: 'お問い合わせ', zh: '联系方式', es: 'Contacto', de: 'Kontakt', fr: 'Contact', pt: 'Contato' }[lang] || 'Contact'}
           </h2>
           <p className="text-gray-600">
-            {lang === 'ko' ? '개발' : lang === 'ja' ? '開発' : lang === 'zh' ? '开发' : 'Development'}: <strong>SPINAI</strong>
+            {{ ko: '개발', ja: '開発', zh: '开发', es: 'Desarrollo', de: 'Entwicklung', fr: 'Developpement', pt: 'Desenvolvimento' }[lang] || 'Development'}: <strong>SPINAI</strong>
           </p>
           <p className="text-gray-600">
             {lang === 'ko' ? '이메일' : 'Email'}: <a href="mailto:spinaiceo@gmail.com" className="text-blue-600">spinaiceo@gmail.com</a>

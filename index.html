@@ -1,27 +1,35 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MedVoice Collector - AI Medical Voice Data Collector</title>
-    <meta name="description" content="AI 음성 의료 데이터 수집기 - 회진·외래 진료 중 의사-환자 대화를 AI가 실시간으로 듣고, 의학 용어로 자동 변환하여 엑셀형 데이터베이스에 채워주는 웹 애플리케이션" />
-    <meta name="keywords" content="의료 음성 기록, AI 진료 기록, medical voice recorder, speech to text medical, 의학 용어 변환, MedVoice, SPINAI, 회진 기록, 외래 기록" />
+    <title>MedVoice Collector | SPINAI</title>
+    <meta name="description" content="An AI-powered web app that listens to doctor-patient conversations in real-time, converts speech to medical terminology, and auto-fills patient data tables. Built by SPINAI." />
+    <meta name="keywords" content="medical voice recorder, AI clinical documentation, speech to text medical, medical terminology converter, MedVoice, SPINAI, real-time transcription, patient data collector, voice recognition healthcare, EMR auto-fill" />
     <meta name="author" content="SPINAI" />
     <meta name="robots" content="index, follow" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="MedVoice Collector - AI Medical Voice Data Collector" />
-    <meta property="og:description" content="의사-환자 대화를 AI가 실시간으로 듣고, 의학 용어로 자동 변환하여 엑셀형 데이터베이스에 채워주는 웹 앱" />
+    <meta property="og:title" content="MedVoice Collector | SPINAI" />
+    <meta property="og:description" content="An AI-powered web app that listens to doctor-patient conversations in real-time, converts speech to medical terminology, and auto-fills patient data tables." />
     <meta property="og:image" content="https://medvoice-collector.vercel.app/og-image.png" />
     <meta property="og:url" content="https://medvoice-collector.vercel.app" />
-    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ko_KR" />
+    <meta property="og:locale:alternate" content="ja_JP" />
+    <meta property="og:locale:alternate" content="zh_CN" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:locale:alternate" content="de_DE" />
+    <meta property="og:locale:alternate" content="fr_FR" />
+    <meta property="og:locale:alternate" content="pt_BR" />
+    <meta property="og:site_name" content="MedVoice Collector | SPINAI" />
     <link rel="canonical" href="https://medvoice-collector.vercel.app" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MedVoice Collector - AI Medical Voice Data Collector" />
-    <meta name="twitter:description" content="AI 음성 의료 데이터 수집기 - 실시간 음성 인식, 의학 용어 자동 변환" />
+    <meta name="twitter:title" content="MedVoice Collector | SPINAI" />
+    <meta name="twitter:description" content="An AI-powered web app that listens to doctor-patient conversations in real-time, converts speech to medical terminology, and auto-fills patient data tables." />
     <meta name="twitter:image" content="https://medvoice-collector.vercel.app/og-image.png" />
 
     <!-- JSON-LD Structured Data -->
@@ -32,17 +40,22 @@
       "name": "MedVoice Collector",
       "applicationCategory": "HealthApplication",
       "operatingSystem": "Web",
-      "description": "AI 음성 의료 데이터 수집기 - 의사-환자 대화를 실시간으로 인식하고 의학 용어로 자동 변환",
+      "description": "An AI-powered web app that listens to doctor-patient conversations in real-time, converts speech to medical terminology, and auto-fills patient data tables.",
+      "url": "https://medvoice-collector.vercel.app",
+      "inLanguage": ["en", "ko", "ja", "zh", "es", "de", "fr", "pt"],
       "author": {
         "@type": "Organization",
         "name": "SPINAI",
-        "email": "spinaiceo@gmail.com"
+        "email": "spinaiceo@gmail.com",
+        "url": "https://medvoice-collector.vercel.app"
       },
       "offers": {
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "USD"
-      }
+      },
+      "screenshot": "https://medvoice-collector.vercel.app/og-image.png",
+      "featureList": "Real-time speech recognition, AI medical term conversion, Excel/CSV export, Multi-language support, PWA, Privacy-first architecture"
     }
     </script>
 
@@ -55,10 +68,14 @@
     <link rel="apple-touch-icon" href="/icon-192.png" />
 
     <!-- Hreflang for multi-language -->
-    <link rel="alternate" hreflang="ko" href="https://medvoice-collector.vercel.app/" />
     <link rel="alternate" hreflang="en" href="https://medvoice-collector.vercel.app/" />
+    <link rel="alternate" hreflang="ko" href="https://medvoice-collector.vercel.app/" />
     <link rel="alternate" hreflang="ja" href="https://medvoice-collector.vercel.app/" />
     <link rel="alternate" hreflang="zh" href="https://medvoice-collector.vercel.app/" />
+    <link rel="alternate" hreflang="es" href="https://medvoice-collector.vercel.app/" />
+    <link rel="alternate" hreflang="de" href="https://medvoice-collector.vercel.app/" />
+    <link rel="alternate" hreflang="fr" href="https://medvoice-collector.vercel.app/" />
+    <link rel="alternate" hreflang="pt" href="https://medvoice-collector.vercel.app/" />
     <link rel="alternate" hreflang="x-default" href="https://medvoice-collector.vercel.app/" />
 
     <!-- Preconnect for performance -->

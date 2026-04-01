@@ -396,6 +396,330 @@ During consultations, doctors must simultaneously listen to patients, mentally t
     privacyTitle: '隐私政策',
     termsTitle: '服务条款',
   },
+
+  es: {
+    newPatient: '+ Nuevo Paciente',
+    export: 'Exportar',
+    settings: 'Configuracion',
+    claudeApiKey: 'Claude API Key (Conversion de Terminos Medicos)',
+    whisperApiKey: 'OpenAI API Key (Reconocimiento de Voz iOS)',
+    apiKeyNote: 'Las claves API se almacenan solo en su navegador y nunca se envian externamente.',
+    realTimeConversation: 'Conversacion en Tiempo Real',
+    transcriptPlaceholder: 'Inicie el reconocimiento de voz para ver la conversacion aqui...',
+    startRecording: 'Iniciar reconocimiento de voz',
+    pause: 'Pausar',
+    resume: 'Reanudar',
+    stopAndConvert: 'Detener y Convertir con IA',
+    converting: 'La IA esta convirtiendo a terminos medicos...',
+    iosMode: 'Modo iOS: Usando Whisper API',
+    patientDataTable: 'Tabla de Datos del Paciente',
+    deletePatient: 'Eliminar paciente',
+    patientList: 'Pacientes:',
+    addPatient: 'Agregar nuevo paciente',
+    builtBy: 'Built by',
+    visitors: 'visitors',
+    excelExport: '.xlsx (Excel)',
+    csvExport: '.csv',
+    clipboardCopy: 'Copiar al Portapapeles',
+    sendFeedback: 'Enviar Comentarios',
+    feedbackTitle: 'Enviar Comentarios',
+    feedbackPlaceholder: 'Comparta sus sugerencias o mejoras...',
+    cancel: 'Cancelar',
+    send: 'Enviar',
+    conversionComplete: 'Conversion IA completada!',
+    conversionFailed: 'Error en conversion IA: ',
+    setApiKey: 'Por favor configure su clave API de Claude',
+    minOnePatient: 'Se requiere al menos un paciente',
+    xlsxDownloaded: 'XLSX descargado!',
+    csvDownloaded: 'CSV descargado!',
+    copiedToClipboard: 'Copiado al portapapeles!',
+    feedbackSent: 'Gracias! Sus comentarios han sido enviados.',
+    micDenied: 'Acceso al microfono denegado. Permita el acceso al microfono en la configuracion del navegador.',
+    sttError: 'Error de reconocimiento de voz: ',
+    home: 'Inicio',
+    about: 'Acerca de',
+    howToUse: 'Como Usar & FAQ',
+    privacy: 'Politica de Privacidad',
+    terms: 'Terminos de Servicio',
+    aboutTitle: 'Acerca de MedVoice Collector',
+    aboutContent: `MedVoice Collector es una herramienta de recopilacion de datos medicos por voz impulsada por IA, desarrollada por SPINAI.
+
+Reconoce conversaciones medico-paciente en tiempo real, convierte automaticamente expresiones coloquiales en terminologia medica estandarizada y rellena una base de datos tipo Excel, todo manos libres.
+
+**Para quien es?**
+- Residentes y medicos tratantes durante rondas o consultas ambulatorias
+- Profesionales medicos que desean optimizar la documentacion clinica
+- Asistentes medicos (PA), enfermeros y estudiantes de medicina
+
+**Que problema resuelve?**
+Durante las consultas, los medicos deben escuchar simultaneamente a los pacientes, traducir mentalmente expresiones coloquiales a terminos medicos y registrar todo manualmente. MedVoice Collector automatiza todo este flujo de trabajo.
+
+**Tecnologia Principal**
+- Reconocimiento de voz en tiempo real via Web Speech API (sin archivos de audio almacenados)
+- Conversion de terminos medicos con reconocimiento de contexto por Anthropic Claude AI
+- Respaldo automatico a OpenAI Whisper API en iOS Safari
+- Soporte PWA para experiencia similar a app nativa`,
+    howToUseTitle: 'Como Usar & Preguntas Frecuentes',
+    step1Title: 'Paso 1: Configure su Clave API',
+    step1Content: 'Haga clic en el icono de configuracion (engranaje) en la esquina superior derecha e ingrese su clave API de Claude. Los usuarios de iOS tambien deben ingresar su clave API de OpenAI.',
+    step2Title: 'Paso 2: Inicie el Reconocimiento de Voz',
+    step2Content: 'Toque el boton azul del microfono para iniciar el reconocimiento de voz en tiempo real. Tenga una conversacion natural con su paciente.',
+    step3Title: 'Paso 3: Conversion IA & Exportacion',
+    step3Content: 'Presione el boton rojo de detencion cuando termine. La IA convertira automaticamente la conversacion en terminologia medica. Revise los resultados y exporte a Excel, CSV o portapapeles.',
+    faqTitle: 'Preguntas Frecuentes (FAQ)',
+    faq: [
+      { q: 'Es gratis MedVoice Collector?', a: 'Si, MedVoice Collector es completamente gratis durante la fase MVP actual. Usted proporciona su propia clave API de Claude.' },
+      { q: 'Donde se almacenan los datos de voz del paciente?', a: 'El audio nunca se almacena. La Web Speech API procesa el habla completamente dentro de su navegador. Solo la transcripcion de texto se guarda en el localStorage de su navegador.' },
+      { q: 'Funciona en iOS Safari?', a: 'Si! Como iOS Safari no soporta la Web Speech API, MedVoice Collector cambia automaticamente a la API Whisper de OpenAI.' },
+      { q: 'Que especialidades medicas soporta?', a: 'Actualmente optimizado para Cirugia General y Medicina Interna, pero funciona bien en la mayoria de las especialidades.' },
+      { q: 'Son seguras mis claves API?', a: 'Sus claves API se almacenan exclusivamente en el localStorage de su navegador y nunca se transmiten a ningun servidor externo.' },
+    ],
+    privacyTitle: 'Politica de Privacidad',
+    termsTitle: 'Terminos de Servicio',
+  },
+
+  de: {
+    newPatient: '+ Neuer Patient',
+    export: 'Exportieren',
+    settings: 'Einstellungen',
+    claudeApiKey: 'Claude API Key (Medizinische Begriffskonvertierung)',
+    whisperApiKey: 'OpenAI API Key (iOS Spracherkennung)',
+    apiKeyNote: 'API-Schluessel werden nur in Ihrem Browser gespeichert und nie extern uebertragen.',
+    realTimeConversation: 'Echtzeit-Gespraech',
+    transcriptPlaceholder: 'Starten Sie die Spracherkennung, um das Gespraech hier zu sehen...',
+    startRecording: 'Spracherkennung starten',
+    pause: 'Pause',
+    resume: 'Fortsetzen',
+    stopAndConvert: 'Stoppen & KI-Konvertierung',
+    converting: 'KI konvertiert in medizinische Begriffe...',
+    iosMode: 'iOS-Modus: Whisper API wird verwendet',
+    patientDataTable: 'Patientendatentabelle',
+    deletePatient: 'Patient loeschen',
+    patientList: 'Patienten:',
+    addPatient: 'Neuen Patienten hinzufuegen',
+    builtBy: 'Built by',
+    visitors: 'visitors',
+    excelExport: '.xlsx (Excel)',
+    csvExport: '.csv',
+    clipboardCopy: 'In Zwischenablage kopieren',
+    sendFeedback: 'Feedback senden',
+    feedbackTitle: 'Feedback senden',
+    feedbackPlaceholder: 'Teilen Sie Ihre Vorschlaege oder Verbesserungen...',
+    cancel: 'Abbrechen',
+    send: 'Senden',
+    conversionComplete: 'KI-Konvertierung abgeschlossen!',
+    conversionFailed: 'KI-Konvertierung fehlgeschlagen: ',
+    setApiKey: 'Bitte setzen Sie Ihren Claude API-Schluessel',
+    minOnePatient: 'Mindestens ein Patient ist erforderlich',
+    xlsxDownloaded: 'XLSX heruntergeladen!',
+    csvDownloaded: 'CSV heruntergeladen!',
+    copiedToClipboard: 'In Zwischenablage kopiert!',
+    feedbackSent: 'Vielen Dank! Ihr Feedback wurde gesendet.',
+    micDenied: 'Mikrofonzugriff verweigert. Bitte erlauben Sie den Mikrofonzugriff in den Browsereinstellungen.',
+    sttError: 'Spracherkennungsfehler: ',
+    home: 'Startseite',
+    about: 'Ueber uns',
+    howToUse: 'Anleitung & FAQ',
+    privacy: 'Datenschutzerklaerung',
+    terms: 'Nutzungsbedingungen',
+    aboutTitle: 'Ueber MedVoice Collector',
+    aboutContent: `MedVoice Collector ist ein KI-gestuetztes medizinisches Sprachdatenerfassungstool, entwickelt von SPINAI.
+
+Es erkennt Arzt-Patienten-Gespraeche in Echtzeit, konvertiert umgangssprachliche Ausdruecke automatisch in standardisierte medizinische Terminologie und fuellt eine Excel-aehnliche Datenbank aus - voellig freiheandig.
+
+**Fuer wen ist es?**
+- Assistenzaerzte und behandelnde Aerzte waehrend Visiten oder ambulanten Sprechstunden
+- Medizinisches Fachpersonal, das die klinische Dokumentation optimieren moechte
+- Arzthelfer, Krankenpfleger und Medizinstudenten
+
+**Welches Problem loest es?**
+Waehrend der Konsultation muessen Aerzte gleichzeitig zuhoeren, umgangssprachliche Ausdruecke in medizinische Begriffe uebersetzen und alles manuell dokumentieren. MedVoice Collector automatisiert diesen gesamten Arbeitsablauf.
+
+**Kerntechnologie**
+- Echtzeit-Spracherkennung ueber Web Speech API (keine Audiodateien gespeichert)
+- Kontextbewusste medizinische Begriffskonvertierung durch Anthropic Claude AI
+- Automatischer Rueckfall auf OpenAI Whisper API bei iOS Safari
+- PWA-Unterstuetzung fuer native App-aehnliche Erfahrung`,
+    howToUseTitle: 'Anleitung & Haeufig gestellte Fragen',
+    step1Title: 'Schritt 1: API-Schluessel einrichten',
+    step1Content: 'Klicken Sie auf das Einstellungssymbol (Zahnrad) oben rechts und geben Sie Ihren Claude API-Schluessel ein. iOS-Benutzer sollten auch ihren OpenAI API-Schluessel eingeben.',
+    step2Title: 'Schritt 2: Spracherkennung starten',
+    step2Content: 'Tippen Sie auf die blaue Mikrofontaste, um die Echtzeit-Spracherkennung zu starten. Fuehren Sie ein natuerliches Gespraech mit Ihrem Patienten.',
+    step3Title: 'Schritt 3: KI-Konvertierung & Export',
+    step3Content: 'Druecken Sie die rote Stopptaste wenn fertig. Die KI konvertiert das Gespraech automatisch in medizinische Terminologie. Ueberpruefen Sie die Ergebnisse und exportieren Sie nach Excel, CSV oder in die Zwischenablage.',
+    faqTitle: 'Haeufig gestellte Fragen (FAQ)',
+    faq: [
+      { q: 'Ist MedVoice Collector kostenlos?', a: 'Ja, MedVoice Collector ist in der aktuellen MVP-Phase voellig kostenlos. Sie stellen Ihren eigenen Claude API-Schluessel bereit.' },
+      { q: 'Wo werden Patientensprachdaten gespeichert?', a: 'Audio wird nie gespeichert. Die Web Speech API verarbeitet Sprache vollstaendig in Ihrem Browser. Nur die Texttranskription wird im localStorage Ihres Browsers gespeichert.' },
+      { q: 'Funktioniert es auf iOS Safari?', a: 'Ja! Da iOS Safari die Web Speech API nicht unterstuetzt, wechselt MedVoice Collector automatisch zur OpenAI Whisper API.' },
+      { q: 'Welche medizinischen Fachrichtungen werden unterstuetzt?', a: 'Derzeit fuer Allgemeinchirurgie und Innere Medizin optimiert, funktioniert aber gut in den meisten Fachrichtungen.' },
+      { q: 'Sind meine API-Schluessel sicher?', a: 'Ihre API-Schluessel werden ausschliesslich im localStorage Ihres Browsers gespeichert und nie an externe Server uebertragen.' },
+    ],
+    privacyTitle: 'Datenschutzerklaerung',
+    termsTitle: 'Nutzungsbedingungen',
+  },
+
+  fr: {
+    newPatient: '+ Nouveau Patient',
+    export: 'Exporter',
+    settings: 'Parametres',
+    claudeApiKey: 'Cle API Claude (Conversion de Termes Medicaux)',
+    whisperApiKey: 'Cle API OpenAI (Reconnaissance Vocale iOS)',
+    apiKeyNote: 'Les cles API sont stockees uniquement dans votre navigateur et ne sont jamais envoyees a l\'exterieur.',
+    realTimeConversation: 'Conversation en Temps Reel',
+    transcriptPlaceholder: 'Demarrez la reconnaissance vocale pour voir la conversation ici...',
+    startRecording: 'Demarrer la reconnaissance vocale',
+    pause: 'Pause',
+    resume: 'Reprendre',
+    stopAndConvert: 'Arreter & Conversion IA',
+    converting: 'L\'IA convertit en termes medicaux...',
+    iosMode: 'Mode iOS : Utilisation de l\'API Whisper',
+    patientDataTable: 'Tableau de Donnees Patient',
+    deletePatient: 'Supprimer le patient',
+    patientList: 'Patients :',
+    addPatient: 'Ajouter un nouveau patient',
+    builtBy: 'Built by',
+    visitors: 'visitors',
+    excelExport: '.xlsx (Excel)',
+    csvExport: '.csv',
+    clipboardCopy: 'Copier dans le Presse-papiers',
+    sendFeedback: 'Envoyer un Commentaire',
+    feedbackTitle: 'Envoyer un Commentaire',
+    feedbackPlaceholder: 'Partagez vos suggestions ou ameliorations...',
+    cancel: 'Annuler',
+    send: 'Envoyer',
+    conversionComplete: 'Conversion IA terminee !',
+    conversionFailed: 'Echec de la conversion IA : ',
+    setApiKey: 'Veuillez configurer votre cle API Claude',
+    minOnePatient: 'Au moins un patient est requis',
+    xlsxDownloaded: 'XLSX telecharge !',
+    csvDownloaded: 'CSV telecharge !',
+    copiedToClipboard: 'Copie dans le presse-papiers !',
+    feedbackSent: 'Merci ! Vos commentaires ont ete envoyes.',
+    micDenied: 'Acces au microphone refuse. Veuillez autoriser l\'acces au microphone dans les parametres du navigateur.',
+    sttError: 'Erreur de reconnaissance vocale : ',
+    home: 'Accueil',
+    about: 'A Propos',
+    howToUse: 'Mode d\'Emploi & FAQ',
+    privacy: 'Politique de Confidentialite',
+    terms: 'Conditions d\'Utilisation',
+    aboutTitle: 'A Propos de MedVoice Collector',
+    aboutContent: `MedVoice Collector est un outil de collecte de donnees medicales vocales alimente par l'IA, developpe par SPINAI.
+
+Il reconnait les conversations medecin-patient en temps reel, convertit automatiquement les expressions familaires en terminologie medicale standardisee et remplit une base de donnees de type Excel, le tout en mains libres.
+
+**Pour qui est-ce ?**
+- Residents et medecins traitants pendant les visites ou consultations ambulatoires
+- Professionnels de sante souhaitant optimiser la documentation clinique
+- Assistants medicaux, infirmiers et etudiants en medecine
+
+**Quel probleme cela resout-il ?**
+Pendant les consultations, les medecins doivent simultanement ecouter les patients, traduire mentalement les expressions courantes en termes medicaux et tout enregistrer manuellement. MedVoice Collector automatise l'ensemble de ce flux de travail.
+
+**Technologie Principale**
+- Reconnaissance vocale en temps reel via Web Speech API (aucun fichier audio stocke)
+- Conversion de termes medicaux contextuelle par Anthropic Claude AI
+- Basculement automatique vers l'API OpenAI Whisper sur iOS Safari
+- Support PWA pour une experience d'application native`,
+    howToUseTitle: 'Mode d\'Emploi & Questions Frequentes',
+    step1Title: 'Etape 1 : Configurer votre Cle API',
+    step1Content: 'Cliquez sur l\'icone de parametres (engrenage) en haut a droite et entrez votre cle API Claude. Les utilisateurs iOS doivent egalement entrer leur cle API OpenAI.',
+    step2Title: 'Etape 2 : Demarrer la Reconnaissance Vocale',
+    step2Content: 'Appuyez sur le bouton bleu du microphone pour demarrer la reconnaissance vocale en temps reel. Ayez une conversation naturelle avec votre patient.',
+    step3Title: 'Etape 3 : Conversion IA & Exportation',
+    step3Content: 'Appuyez sur le bouton rouge d\'arret lorsque vous avez termine. L\'IA convertira automatiquement la conversation en terminologie medicale. Verifiez les resultats, puis exportez vers Excel, CSV ou le presse-papiers.',
+    faqTitle: 'Questions Frequentes (FAQ)',
+    faq: [
+      { q: 'MedVoice Collector est-il gratuit ?', a: 'Oui, MedVoice Collector est entierement gratuit pendant la phase MVP actuelle. Vous fournissez votre propre cle API Claude.' },
+      { q: 'Ou sont stockees les donnees vocales des patients ?', a: 'L\'audio n\'est jamais stocke. La Web Speech API traite la parole entierement dans votre navigateur. Seule la transcription textuelle est sauvegardee dans le localStorage de votre navigateur.' },
+      { q: 'Fonctionne-t-il sur iOS Safari ?', a: 'Oui ! Comme iOS Safari ne prend pas en charge la Web Speech API, MedVoice Collector bascule automatiquement vers l\'API Whisper d\'OpenAI.' },
+      { q: 'Quelles specialites medicales sont supportees ?', a: 'Actuellement optimise pour la Chirurgie Generale et la Medecine Interne, mais fonctionne bien dans la plupart des specialites.' },
+      { q: 'Mes cles API sont-elles securisees ?', a: 'Vos cles API sont stockees exclusivement dans le localStorage de votre navigateur et ne sont jamais transmises a un serveur externe.' },
+    ],
+    privacyTitle: 'Politique de Confidentialite',
+    termsTitle: 'Conditions d\'Utilisation',
+  },
+
+  pt: {
+    newPatient: '+ Novo Paciente',
+    export: 'Exportar',
+    settings: 'Configuracoes',
+    claudeApiKey: 'Chave API Claude (Conversao de Termos Medicos)',
+    whisperApiKey: 'Chave API OpenAI (Reconhecimento de Voz iOS)',
+    apiKeyNote: 'As chaves API sao armazenadas apenas no seu navegador e nunca sao enviadas externamente.',
+    realTimeConversation: 'Conversa em Tempo Real',
+    transcriptPlaceholder: 'Inicie o reconhecimento de voz para ver a conversa aqui...',
+    startRecording: 'Iniciar reconhecimento de voz',
+    pause: 'Pausar',
+    resume: 'Retomar',
+    stopAndConvert: 'Parar & Converter com IA',
+    converting: 'IA esta convertendo para termos medicos...',
+    iosMode: 'Modo iOS: Usando API Whisper',
+    patientDataTable: 'Tabela de Dados do Paciente',
+    deletePatient: 'Excluir paciente',
+    patientList: 'Pacientes:',
+    addPatient: 'Adicionar novo paciente',
+    builtBy: 'Built by',
+    visitors: 'visitors',
+    excelExport: '.xlsx (Excel)',
+    csvExport: '.csv',
+    clipboardCopy: 'Copiar para Area de Transferencia',
+    sendFeedback: 'Enviar Feedback',
+    feedbackTitle: 'Enviar Feedback',
+    feedbackPlaceholder: 'Compartilhe suas sugestoes ou melhorias...',
+    cancel: 'Cancelar',
+    send: 'Enviar',
+    conversionComplete: 'Conversao IA concluida!',
+    conversionFailed: 'Falha na conversao IA: ',
+    setApiKey: 'Por favor, configure sua chave API Claude',
+    minOnePatient: 'Pelo menos um paciente e necessario',
+    xlsxDownloaded: 'XLSX baixado!',
+    csvDownloaded: 'CSV baixado!',
+    copiedToClipboard: 'Copiado para a area de transferencia!',
+    feedbackSent: 'Obrigado! Seu feedback foi enviado.',
+    micDenied: 'Acesso ao microfone negado. Permita o acesso ao microfone nas configuracoes do navegador.',
+    sttError: 'Erro de reconhecimento de voz: ',
+    home: 'Inicio',
+    about: 'Sobre',
+    howToUse: 'Como Usar & FAQ',
+    privacy: 'Politica de Privacidade',
+    terms: 'Termos de Servico',
+    aboutTitle: 'Sobre o MedVoice Collector',
+    aboutContent: `MedVoice Collector e uma ferramenta de coleta de dados medicos por voz alimentada por IA, desenvolvida pela SPINAI.
+
+Reconhece conversas medico-paciente em tempo real, converte automaticamente expressoes coloquiais em terminologia medica padronizada e preenche um banco de dados estilo Excel, tudo sem usar as maos.
+
+**Para quem e?**
+- Residentes e medicos assistentes durante rondas ou consultas ambulatoriais
+- Profissionais de saude que desejam otimizar a documentacao clinica
+- Assistentes medicos (PA), enfermeiros e estudantes de medicina
+
+**Que problema resolve?**
+Durante as consultas, os medicos devem simultaneamente ouvir os pacientes, traduzir mentalmente expressoes coloquiais em termos medicos e registrar tudo manualmente. O MedVoice Collector automatiza todo esse fluxo de trabalho.
+
+**Tecnologia Principal**
+- Reconhecimento de voz em tempo real via Web Speech API (sem arquivos de audio armazenados)
+- Conversao de termos medicos com reconhecimento de contexto por Anthropic Claude AI
+- Fallback automatico para API OpenAI Whisper no iOS Safari
+- Suporte PWA para experiencia semelhante a app nativo`,
+    howToUseTitle: 'Como Usar & Perguntas Frequentes',
+    step1Title: 'Passo 1: Configure sua Chave API',
+    step1Content: 'Clique no icone de configuracoes (engrenagem) no canto superior direito e insira sua chave API Claude. Usuarios iOS tambem devem inserir sua chave API OpenAI.',
+    step2Title: 'Passo 2: Inicie o Reconhecimento de Voz',
+    step2Content: 'Toque no botao azul do microfone para iniciar o reconhecimento de voz em tempo real. Tenha uma conversa natural com seu paciente.',
+    step3Title: 'Passo 3: Conversao IA & Exportacao',
+    step3Content: 'Pressione o botao vermelho de parada quando terminar. A IA convertera automaticamente a conversa em terminologia medica. Revise os resultados e exporte para Excel, CSV ou area de transferencia.',
+    faqTitle: 'Perguntas Frequentes (FAQ)',
+    faq: [
+      { q: 'O MedVoice Collector e gratuito?', a: 'Sim, o MedVoice Collector e completamente gratuito durante a fase MVP atual. Voce fornece sua propria chave API Claude.' },
+      { q: 'Onde os dados de voz do paciente sao armazenados?', a: 'O audio nunca e armazenado. A Web Speech API processa a fala inteiramente no seu navegador. Apenas a transcricao de texto e salva no localStorage do seu navegador.' },
+      { q: 'Funciona no iOS Safari?', a: 'Sim! Como o iOS Safari nao suporta a Web Speech API, o MedVoice Collector muda automaticamente para a API Whisper da OpenAI.' },
+      { q: 'Quais especialidades medicas sao suportadas?', a: 'Atualmente otimizado para Cirurgia Geral e Medicina Interna, mas funciona bem na maioria das especialidades.' },
+      { q: 'Minhas chaves API estao seguras?', a: 'Suas chaves API sao armazenadas exclusivamente no localStorage do seu navegador e nunca sao transmitidas para nenhum servidor externo.' },
+    ],
+    privacyTitle: 'Politica de Privacidade',
+    termsTitle: 'Termos de Servico',
+  },
 }
 
 function detectLanguage() {
@@ -424,10 +748,14 @@ export function t(key, lang) {
 
 export function getSupportedLangs() {
   return [
-    { code: 'ko', label: '한국어' },
     { code: 'en', label: 'English' },
+    { code: 'ko', label: '한국어' },
     { code: 'ja', label: '日本語' },
     { code: 'zh', label: '中文' },
+    { code: 'es', label: 'Espanol' },
+    { code: 'de', label: 'Deutsch' },
+    { code: 'fr', label: 'Francais' },
+    { code: 'pt', label: 'Portugues' },
   ]
 }
 
